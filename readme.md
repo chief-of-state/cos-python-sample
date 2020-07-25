@@ -22,16 +22,7 @@ make ps
 
 # supervise logs
 make logs
-```
 
-
-### Testing with the cli-client
-
-This POC implements gRPC client to test the API, handlers, and chief-of-state gRPC calls directly.
-```bash
-# start the client
-make test-client
-
-# then, within that shell
-python ./test_client.py
+# run sample commands
+make test
 ```
