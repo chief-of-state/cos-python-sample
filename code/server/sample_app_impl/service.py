@@ -14,7 +14,7 @@ class SampleServiceImpl(SampleServiceServicer):
         # do stateless validation
         StatelessValidation.validate(request)
         # send to chief of state, get resulting state
-        return CosClient.process_command(request.id, request)
+        return CosClient.get_state(request.id)
 
     def AppendCall(self, request, context):
         logger.info("SampleServiceImpl.AppendCall")

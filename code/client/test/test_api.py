@@ -9,14 +9,19 @@ class TestApi():
         channel = get_channel(host, port)
         stub = SampleServiceStub(channel)
 
-        TestApi.create(stub)
-        TestApi.append(stub)
-        TestApi.get(stub)
+        for i in range(0,10):
+            id = f'some-id-{i}'
+            TestApi.create(stub, id)
+            TestApi.append(stub, id, i)
+            TestApi.get(stub, id)
+
+        # TestApi.create(stub, id)
+        # TestApi.append(stub, id)
+        # TestApi.get(stub, id)
 
     @staticmethod
-    def create(stub):
+    def create(stub, id):
         print("TestApi.create")
-        id = "api-test"
         request = CreateRequest(id = id)
         response = stub.CreateCall(request)
         assert isinstance(response, State)
@@ -24,9 +29,8 @@ class TestApi():
 
 
     @staticmethod
-    def append(stub):
+    def append(stub, id, value):
         print("TestApi.append")
-        id = "api-test"
         value = "y"
         request = AppendRequest(id = id, append = value)
         response = stub.AppendCall(request)
@@ -35,10 +39,8 @@ class TestApi():
         assert value in response.values
 
     @staticmethod
-    def get(stub):
+    def get(stub, id):
         print("TestApi.get")
-        id = "api-test"
-        value = "y"
         request = GetRequest(id = id)
         response = stub.GetCall(request)
         assert isinstance(response, State)

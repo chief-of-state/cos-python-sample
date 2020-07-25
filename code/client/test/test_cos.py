@@ -27,7 +27,7 @@ class TestCos():
 
         # wrap in COS request
         cos_request = ProcessCommandRequest(
-            entity_uuid = id,
+            entity_id = id,
             command = ProtoHelper.pack_any(command)
         )
 
@@ -46,7 +46,7 @@ class TestCos():
 
         # wrap in COS request
         cos_request = ProcessCommandRequest(
-            entity_uuid = id,
+            entity_id = id,
             command = ProtoHelper.pack_any(command)
         )
 

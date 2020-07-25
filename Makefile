@@ -15,8 +15,11 @@ protogen:
 
 .phony: test-client
 test-client:
-	@ $(DCO) up -d test-client
-	@ $(DCO) exec test-client bash
+	# @ $(DCO) exec test-client bash
+
+.phony: test
+test:
+	@ $(DCO) exec test-client python ./test_client.py
 
 .phony: dco
 dco:
@@ -28,7 +31,12 @@ ps:
 
 .phony: logs
 logs:
-	@ $(DCO) logs -f --tail="all" api write-handler chiefofstate postgres
+	@ $(DCO) logs -f --tail="all" api write-handler read-handler chiefofstate postgres
+
+.phony: logs-apps
+logs-apps:
+	@ $(DCO) logs -f --tail="all" api write-handler read-handler
+
 
 .phony: build
 build:
@@ -44,4 +52,6 @@ down:
 
 .phony: restart
 restart:
-	@ $(DCO) restart -t 0 api write-handler
+	@ $(DCO) stop -t 0 api write-handler read-handler
+	@ $(DCO) rm -f api write-handler read-handler
+	@ $(DCO) up -d api write-handler read-handler

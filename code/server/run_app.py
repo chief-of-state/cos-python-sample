@@ -9,7 +9,7 @@ from concurrent import futures
 
 def run(port):
     configure_logging()
-    logging.info("starting server")
+    logging.info(f"starting server, {port}")
     # define grpc server
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     # add grpc implementation to server
@@ -22,5 +22,5 @@ def run(port):
     logging.info("killing server")
 
 if __name__ == '__main__':
-    PORT = os.environ.get("APP_PORT") or "9010"
+    PORT = os.environ.get("APP_PORT") or "9000"
     run(PORT)
