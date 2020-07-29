@@ -21,9 +21,9 @@ services:
       - python
       - run_write_handler.py
     ports:
-      - 9011:9011
+      - 50052:50052
     environment:
-      APP_PORT: "9011"
+      APP_PORT: "50052"
 
   read-handler:
     image: cos-python-sample:latest
@@ -31,9 +31,9 @@ services:
       - python
       - run_read_handler.py
     ports:
-      - 9012:9012
+      - 50053:50053
     environment:
-      APP_PORT: "9012"
+      APP_PORT: "50053"
 
   test-client:
     image: cos-python-sample:latest
@@ -46,14 +46,14 @@ services:
       API_HOST: api
       API_PORT: "9010"
       WRITE_HANDLER_HOST: write-handler
-      WRITE_HANDLER_PORT: "9011"
+      WRITE_HANDLER_PORT: "50052"
       COS_HOST: chiefofstate
       COS_PORT: "9000"
     volumes:
       - ./code/client:/app/client
 
   chiefofstate:
-    image: registry.namely.land/namely/chief-of-state:master-9cff63
+    image: registry.namely.land/namely/chief-of-state:0.1.1
     hostname: chiefofstate
     depends_on:
       - postgres
@@ -63,11 +63,12 @@ services:
       - 9095:9095
       - 5266:5266
     environment:
+      LOG_LEVEL: INFO
       COS_ADDRESS: "0.0.0.0"
       COS_PORT: 9000
       COS_SERVICE_NAME: "chiefofstate"
       WRITE_SIDE_HANDLER_SERVICE_HOST: write-handler
-      WRITE_SIDE_HANDLER_SERVICE_PORT: 9011
+      WRITE_SIDE_HANDLER_SERVICE_PORT: 50052
       HANDLER_SERVICE_STATES_PROTO: "com.namely.protobuf.chief_of_state.samples.State"
       HANDLER_SERVICE_EVENTS_PROTOS: "com.namely.protobuf.chief_of_state.samples.AppendEvent,com.namely.protobuf.chief_of_state.samples.CreateEvent"
       TRACE_HOST: tracer
@@ -90,9 +91,9 @@ services:
       COS_READ_SIDE_OFFSET_DB: "postgres"
       COS_READ_SIDE_OFFSET_DB_SCHEMA: "public"
       READ_SIDE_HANDLER_SERVICE_HOST: x
-      READ_SIDE_HANDLER_SERVICE_PORT: 9999
+      READ_SIDE_HANDLER_SERVICE_PORT: 50053
       COS_READSIDE_CONFIG__HOST__LOGGER_READSIDE: read-handler
-      COS_READSIDE_CONFIG__PORT__LOGGER_READSIDE: 9012
+      COS_READSIDE_CONFIG__PORT__LOGGER_READSIDE: 50053
       JAVA_OPTS: "-Dconfig.resource=docker.conf"
 
   postgres:
@@ -106,38 +107,38 @@ services:
     ports:
       - "5432:5432"
 
-  pgadmin:
-    image: dpage/pgadmin4:4.24
-    environment:
-      PGADMIN_DEFAULT_EMAIL: "admin@namely.com"
-      PGADMIN_DEFAULT_PASSWORD: "admin"
-      PGADMIN_SERVER_JSON_FILE: /etc/pgadmin4/pgadmin-servers.json
-    ports:
-      - 5050:80
-    volumes:
-      - ./docker/pgadmin-servers.json:/etc/pgadmin4/pgadmin-servers.json
+  # pgadmin:
+  #   image: dpage/pgadmin4:4.24
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: "admin@namely.com"
+  #     PGADMIN_DEFAULT_PASSWORD: "admin"
+  #     PGADMIN_SERVER_JSON_FILE: /etc/pgadmin4/pgadmin-servers.json
+  #   ports:
+  #     - 5050:80
+  #   volumes:
+  #     - ./docker/pgadmin-servers.json:/etc/pgadmin4/pgadmin-servers.json
 
-  tracer:
-    image: jaegertracing/all-in-one:1.17
-    environment:
-      COLLECTOR_ZIPKIN_HTTP_PORT: 9411
-      LOG_LEVEL: INFO
-    ports:
-      - 16686:16686
-      - 14268:14268
+  # tracer:
+  #   image: jaegertracing/all-in-one:1.17
+  #   environment:
+  #     COLLECTOR_ZIPKIN_HTTP_PORT: 9411
+  #     LOG_LEVEL: INFO
+  #   ports:
+  #     - 16686:16686
+  #     - 14268:14268
 
-  grafana:
-    image: grafana/grafana
-    volumes:
-      - ./docker/grafana-prometheus.yml:/etc/grafana/provisioning/datasources/prometheus.yml
-    ports:
-      - "3000:3000"
+  # grafana:
+  #   image: grafana/grafana
+  #   volumes:
+  #     - ./docker/grafana-prometheus.yml:/etc/grafana/provisioning/datasources/prometheus.yml
+  #   ports:
+  #     - "3000:3000"
 
-  prometheus:
-    image: prom/prometheus:v2.1.0
-    volumes:
-      - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml
-    command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
-    ports:
-      - "9090:9090"
+  # prometheus:
+  #   image: prom/prometheus:v2.1.0
+  #   volumes:
+  #     - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml
+  #   command:
+  #     - "--config.file=/etc/prometheus/prometheus.yml"
+  #   ports:
+  #     - "9090:9090"

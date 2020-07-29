@@ -15,7 +15,7 @@ class CosClient():
         logger.debug('begin get_state')
         client = CosClient._get_cos_client()
         command = GetStateRequest(entity_id=id)
-        response = client.GetStateRequest(command)
+        response = client.GetState(command)
         resulting_state = ProtoHelper.unpack_any(response.state, State)
         return resulting_state
 

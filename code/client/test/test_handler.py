@@ -23,9 +23,11 @@ class TestHandler():
         channel = get_channel(host, port)
         stub = WriteSideHandlerServiceStub(channel)
 
-        TestHandler.handleCommandCreate(stub)
-        TestHandler.handleCommandAppend(stub)
-        TestHandler.handleCommandGet(stub)
+        # TestHandler.handleCommandCreate(stub)
+        # TestHandler.handleCommandAppend(stub)
+        # TestHandler.handleCommandGet(stub)
+
+        TestHandler.testFailure(stub)
 
     @staticmethod
     def handleCommandCreate(stub):
@@ -98,6 +100,26 @@ class TestHandler():
         assert isinstance(response, HandleCommandResponse)
         assert response.HasField("reply")
 
+    def testFailure(stub):
+        print("TestHandler.testFailure")
+        id = ""
+        cmd = CreateRequest(id = id)
+        current_state = State()
+        meta = MetaData()
+
+        request = HandleCommandRequest(
+            command=ProtoHelper.pack_any(cmd),
+            current_state=ProtoHelper.pack_any(current_state),
+            meta=meta,
+        )
+
+        try:
+            stub.HandleCommand(request)
+
+        except Exception as e:
+            code = e.code()
+            assert e.code() == grpc.StatusCode.INVALID_ARGUMENT, e
+            assert e.details() == "invalid command, ID required", e.details()
 
 if __name__ == '__main__':
     TestApi.run()

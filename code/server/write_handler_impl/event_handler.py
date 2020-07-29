@@ -27,6 +27,8 @@ class EventHandler():
         # build new state
         new_state = State()
         new_state.CopyFrom(real_current_state)
+        new_state.id = real_event.id
+
         new_state.values.append(real_event.appended)
 
         # create return

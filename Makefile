@@ -7,7 +7,7 @@ setup:
 
 .phony: protogen
 protogen:
-	@docker run \
+	@docker run --rm \
 		-v `pwd`:/mnt/local/ \
 		-w /mnt/local/ \
 		python:3.7.6-stretch \

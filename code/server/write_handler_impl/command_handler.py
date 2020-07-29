@@ -17,7 +17,7 @@ class CommandHandler():
         general command handler that matches on command type url
         and runs appropriate handler method
         '''
-        logger.debug(f"CommandHandler.handle_command")
+        logger.info(f"CommandHandler.handle_command")
 
         if ("CreateRequest" in command.type_url):
             return CommandHandler._handle_create(
@@ -49,12 +49,14 @@ class CommandHandler():
         real_command = ProtoHelper.unpack_any(command, CreateRequest)
         real_current_state = ProtoHelper.unpack_any(current_state, State)
 
-        assert real_command.id, "ID required"
-
-        event = CreateEvent(id=real_command.id)
-        output = CosEventReplyTypes.persist_and_reply(event)
-
-        return output
+        if not real_current_state.id:
+            assert real_command.id, "ID required"
+            event = CreateEvent(id=real_command.id)
+            output = CosEventReplyTypes.persist_and_reply(event)
+            return output
+        else:
+            logger.warn("duplicate ID created, returning state")
+            return CosEventReplyTypes.reply()
 
 
     @staticmethod
@@ -70,9 +72,7 @@ class CommandHandler():
         # do validation
         assert isinstance(real_command, AppendRequest), 'unpack event failed'
         assert isinstance(real_current_state, State), 'unpack state failed'
-        if real_current_state.id:
-            assert real_command.id == real_current_state.id, f"mismatched ids, {real_command.id} and {real_current_state.id}"
-        assert not real_command.append in real_current_state.values, f"duplicate value {real_command.append}"
+        assert real_command.append, f"cannot append empty value"
 
         # make event
         event = AppendEvent()
