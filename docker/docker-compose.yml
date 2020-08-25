@@ -92,8 +92,8 @@ services:
       COS_READ_SIDE_OFFSET_DB_SCHEMA: "public"
       READ_SIDE_HANDLER_SERVICE_HOST: x
       READ_SIDE_HANDLER_SERVICE_PORT: 50053
-      COS_READSIDE_CONFIG__HOST__LOGGER_READSIDE: read-handler
-      COS_READSIDE_CONFIG__PORT__LOGGER_READSIDE: 50053
+      COS_READ_SIDE_CONFIG__HOST__LOGGER_READSIDE: read-handler
+      COS_READ_SIDE_CONFIG__PORT__LOGGER_READSIDE: 50053
       JAVA_OPTS: "-Dconfig.resource=docker.conf"
 
   postgres:
@@ -107,16 +107,16 @@ services:
     ports:
       - "5432:5432"
 
-  # pgadmin:
-  #   image: dpage/pgadmin4:4.24
-  #   environment:
-  #     PGADMIN_DEFAULT_EMAIL: "admin@namely.com"
-  #     PGADMIN_DEFAULT_PASSWORD: "admin"
-  #     PGADMIN_SERVER_JSON_FILE: /etc/pgadmin4/pgadmin-servers.json
-  #   ports:
-  #     - 5050:80
-  #   volumes:
-  #     - ./docker/pgadmin-servers.json:/etc/pgadmin4/pgadmin-servers.json
+  pgadmin:
+    image: dpage/pgadmin4:4.24
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@namely.com"
+      PGADMIN_DEFAULT_PASSWORD: "admin"
+      PGADMIN_SERVER_JSON_FILE: /etc/pgadmin4/pgadmin-servers.json
+    ports:
+      - 5050:80
+    volumes:
+      - ./docker/pgadmin-servers.json:/etc/pgadmin4/pgadmin-servers.json
 
   # tracer:
   #   image: jaegertracing/all-in-one:1.17
