@@ -53,7 +53,7 @@ services:
       - ./code/client:/app/client
 
   chiefofstate:
-    image: registry.namely.land/namely/chief-of-state:0.1.1
+    image: registry.namely.land/namely/chief-of-state:0.2-alpha.3
     hostname: chiefofstate
     depends_on:
       - postgres
