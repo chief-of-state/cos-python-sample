@@ -2,14 +2,19 @@ from sample_app.api_pb2_grpc import SampleServiceStub
 from sample_app.api_pb2 import AppendRequest, GetRequest, CreateRequest
 from sample_app.state_pb2 import State
 from cos_helpers.grpc import get_channel
+from cos_helpers.proto import ProtoHelper
+from google.protobuf.empty_pb2 import Empty
 from uuid import uuid4
 import grpc
+from grpc import StatusCode, RpcError
 
 class TestApi():
     @staticmethod
     def run(host, port):
         channel = get_channel(host, port)
         stub = SampleServiceStub(channel)
+
+        TestApi.test_noop(stub)
 
         ids = [uuid4().hex for i in range(10)]
 
@@ -25,6 +30,7 @@ class TestApi():
         TestApi.get_failure(stub)
         TestApi.handler_failure_id(stub)
         TestApi.handler_validation_failure(stub)
+
 
     @staticmethod
     def create(stub, id):
@@ -93,5 +99,14 @@ class TestApi():
             assert "cannot append empty value" in e.details().lower(), f'wrong error {e.details()}'
         assert did_fail, 'did not fail'
 
-if __name__ == '__main__':
-    TestApi.run()
+    @staticmethod
+    def test_noop(stub):
+        print("TestApi.test_noop")
+        request = AppendRequest(id = uuid4().hex, append = "no-op")
+        try:
+            response = stub.AppendCall(request)
+            print(type(response))
+        except RpcError as e:
+            assert e.code() == StatusCode.NOT_FOUND, "wrong status code"
+        except Exception as e:
+            raise e

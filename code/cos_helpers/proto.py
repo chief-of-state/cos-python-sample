@@ -1,4 +1,5 @@
 from google.protobuf.any_pb2 import Any
+from google.protobuf.empty_pb2 import Empty
 from google.protobuf.json_format import MessageToJson
 
 class ProtoHelper():

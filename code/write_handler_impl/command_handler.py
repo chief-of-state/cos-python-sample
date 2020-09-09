@@ -69,6 +69,9 @@ class CommandHandler():
         real_command = ProtoHelper.unpack_any(command, AppendRequest)
         real_current_state = ProtoHelper.unpack_any(current_state, State)
 
+        if real_command.append == "no-op":
+            return CosEventReplyTypes.reply()
+
         # do validation
         assert isinstance(real_command, AppendRequest), 'unpack event failed'
         assert isinstance(real_current_state, State), 'unpack state failed'

@@ -13,6 +13,8 @@ services:
       COS_HOST: "chiefofstate"
       COS_PORT: "9000"
       APP_PORT: "9010"
+    volumes:
+      - ./code:/app:delegated
 
   write-handler:
     image: cos-python-sample:dev
@@ -51,12 +53,12 @@ services:
       WRITE_HANDLER_PORT: "50052"
       COS_HOST: chiefofstate
       COS_PORT: "9000"
-    volumes:
-      - ./code/test:/app/test:delegated
+    # volumes:
+    #   - ./code/test:/app/test:delegated
 
   chiefofstate:
     image: registry.namely.land/namely/chief-of-state:dev
-    container_name: chief-of-state
+    container_name: chiefofstate
     hostname: chiefofstate
     depends_on:
       - postgres
@@ -93,6 +95,7 @@ services:
       COS_READ_SIDE_CONFIG__HOST__LOGGER_READSIDE: read-handler
       COS_READ_SIDE_CONFIG__PORT__LOGGER_READSIDE: 50053
       JAVA_OPTS: "-Dconfig.resource=docker.conf"
+      COS_STORES_AUTO_CREATE: "true"
 
   postgres:
     image: postgres:9.6
@@ -101,10 +104,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
       POSTGRES_DB: postgres
-    volumes:
-      - ./config/init-db.sql/:/docker-entrypoint-initdb.d/init-db.sql:delegated
     ports:
-      - "5432:5432"
+      - 5432:5432
 
   pgadmin:
     image: dpage/pgadmin4:4.24
@@ -116,7 +117,7 @@ services:
     ports:
       - 5050:80
     volumes:
-      - ./config/pgadmin-servers.json:/etc/pgadmin4/pgadmin-servers.json
+      - ./configs/pgadmin-servers.json:/etc/pgadmin4/pgadmin-servers.json
 
   # tracer:
   #   image: jaegertracing/all-in-one:1.17
@@ -130,14 +131,14 @@ services:
   # grafana:
   #   image: grafana/grafana
   #   volumes:
-  #     - ./config/grafana-prometheus.yml:/etc/grafana/provisioning/datasources/prometheus.yml
+  #     - ./configs/grafana-prometheus.yml:/etc/grafana/provisioning/datasources/prometheus.yml
   #   ports:
   #     - "3000:3000"
 
   # prometheus:
   #   image: prom/prometheus:v2.1.0
   #   volumes:
-  #     - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+  #     - ./configs/prometheus.yml:/etc/prometheus/prometheus.yml
   #   command:
   #     - "--config.file=/etc/prometheus/prometheus.yml"
   #   ports:

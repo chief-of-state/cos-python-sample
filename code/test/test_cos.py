@@ -8,6 +8,7 @@ from cos_helpers.proto import ProtoHelper
 from cos_helpers.grpc import get_channel
 from uuid import uuid4
 from grpc import StatusCode
+from google.protobuf.empty_pb2 import Empty
 
 
 class TestCos():
@@ -16,12 +17,29 @@ class TestCos():
         channel = get_channel(host, port)
         stub = ChiefOfStateServiceStub(channel)
 
+        TestCos._test_noop(stub)
+
         id = uuid4().hex
         TestCos._test_create(stub, id)
         TestCos._test_append(stub, id)
         TestCos._test_fail_append(stub)
         TestCos._test_fail_id(stub)
         TestCos._test_fail_get(stub)
+
+    @staticmethod
+    def _test_noop(stub):
+        print("TestCos.NoOp")
+        id = uuid4().hex
+        # create a command
+        command = AppendRequest(id = id, append = 'no-op')
+        # wrap in COS request
+        cos_request = ProcessCommandRequest(
+            entity_id = id,
+            command = ProtoHelper.pack_any(command)
+        )
+        # send to COS
+        response = stub.ProcessCommand(cos_request)
+        assert 'google.protobuf.Empty' in response.state.type_url, "expecting an empty!"
 
     @staticmethod
     def _test_create(stub, id):
