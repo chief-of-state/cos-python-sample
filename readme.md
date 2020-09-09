@@ -4,9 +4,9 @@ Sample gRPC python application using [Chief of State](https://github.com/namely/
 
 ### Overview
 
-This sample application uses Chief of State to build [state](./proto/sample_app/state.proto) that
-manages an array of strings and accepts [requests](./proto/sample_app/api.proto) to append more strings. State is derived from
-[events](./proto/sample_app/events.proto).
+This sample application uses Chief of State to build [state](./proto/local/sample_app/state.proto) that
+manages an array of strings and accepts [requests](./proto/local/sample_app/api.proto) to append more strings. State is derived from
+[events](./proto/local/sample_app/events.proto).
 
 ### Quickstart
 
