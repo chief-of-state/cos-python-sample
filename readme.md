@@ -20,11 +20,13 @@ earth +all
 # starts all containers
 docker-compose up -d
 
-# see containers
-docker-compose ps
-
 # run sample commands
 docker-compose exec test-client python -m test
+
+# OTHER HELPFUL COMMANDS
+
+# only generate protobufs locally
+earth +protogen
 
 # supervise app logs
 docker-compose logs -f --tail="all" api write-handler read-handler
