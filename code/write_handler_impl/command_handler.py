@@ -1,7 +1,7 @@
 from sample_app.api_pb2 import AppendRequest, GetRequest, CreateRequest
 from sample_app.events_pb2 import AppendEvent, CreateEvent
 from sample_app.state_pb2 import State
-from chief_of_state.writeside_pb2 import PersistAndReply, PersistAndReply, Reply, HandleEventResponse
+from chief_of_state.v1.writeside_pb2 import PersistAndReply, PersistAndReply, Reply, HandleEventResponse
 from cos_helpers.cos import CosEventReplyTypes
 from cos_helpers.proto import ProtoHelper
 import logging

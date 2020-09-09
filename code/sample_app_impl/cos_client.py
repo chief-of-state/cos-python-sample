@@ -1,7 +1,7 @@
 import os
 import logging
-from chief_of_state.service_pb2_grpc import ChiefOfStateServiceStub
-from chief_of_state.service_pb2 import ProcessCommandRequest, GetStateRequest
+from chief_of_state.v1.service_pb2_grpc import ChiefOfStateServiceStub
+from chief_of_state.v1.service_pb2 import ProcessCommandRequest, GetStateRequest
 from cos_helpers.proto import ProtoHelper
 from cos_helpers.grpc import get_channel
 from sample_app.state_pb2 import State

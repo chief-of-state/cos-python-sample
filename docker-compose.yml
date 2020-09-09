@@ -1,44 +1,46 @@
 version: "3.8"
 services:
   api:
-    build:
-      context: .
-      dockerfile: ./docker/Dockerfile
-    image: cos-python-sample
+    image: cos-python-sample:dev
+    container_name: api
     entrypoint:
       - python
-      - run_app.py
+      - -m
+      - sample_app_impl
     ports:
-      - 9010:9010
+      - 9010
     environment:
       COS_HOST: "chiefofstate"
       COS_PORT: "9000"
       APP_PORT: "9010"
 
   write-handler:
-    image: cos-python-sample:latest
+    image: cos-python-sample:dev
+    container_name: write-handler
     entrypoint:
       - python
-      - run_write_handler.py
+      - -m
+      - write_handler_impl
     ports:
-      - 50052:50052
+      - 50052
     environment:
       APP_PORT: "50052"
 
   read-handler:
-    image: cos-python-sample:latest
+    image: cos-python-sample:dev
+    container_name: read-handler
     entrypoint:
       - python
-      - run_read_handler.py
+      - -m
+      - read_handler_impl
     ports:
-      - 50053:50053
+      - 50053
     environment:
       APP_PORT: "50053"
 
   test-client:
-    image: cos-python-sample:latest
+    image: cos-python-sample:dev
     container_name: test-client
-    working_dir: /app/client
     entrypoint:
       - sleep
       - infinity
@@ -50,18 +52,19 @@ services:
       COS_HOST: chiefofstate
       COS_PORT: "9000"
     volumes:
-      - ./code/client:/app/client
+      - ./code/test:/app/test:delegated
 
   chiefofstate:
-    image: registry.namely.land/namely/chief-of-state:0.2-alpha.3
+    image: registry.namely.land/namely/chief-of-state:dev
+    container_name: chief-of-state
     hostname: chiefofstate
     depends_on:
       - postgres
     ports:
-      - 9000:9000
-      - 9102:9102
-      - 9095:9095
-      - 5266:5266
+      - 9000
+      - 9102
+      - 9095
+      - 5266
     environment:
       LOG_LEVEL: INFO
       COS_ADDRESS: "0.0.0.0"
@@ -69,12 +72,9 @@ services:
       COS_SERVICE_NAME: "chiefofstate"
       WRITE_SIDE_HANDLER_SERVICE_HOST: write-handler
       WRITE_SIDE_HANDLER_SERVICE_PORT: 50052
-      HANDLER_SERVICE_STATES_PROTO: "com.namely.protobuf.chief_of_state.samples.State"
-      HANDLER_SERVICE_EVENTS_PROTOS: "com.namely.protobuf.chief_of_state.samples.AppendEvent,com.namely.protobuf.chief_of_state.samples.CreateEvent"
+      HANDLER_SERVICE_ENABLE_PROTO_VALIDATION: "false"
       TRACE_HOST: tracer
       TRACE_PORT: 14268
-      NAMELY_ENV: "dev"
-      TEAM_NAME: "data"
       COS_POSTGRES_USER: "postgres"
       COS_POSTGRES_PASSWORD: "changeme"
       COS_POSTGRES_HOST: "postgres"
@@ -90,14 +90,13 @@ services:
       COS_READ_SIDE_OFFSET_DB_PASSWORD: "changeme"
       COS_READ_SIDE_OFFSET_DB: "postgres"
       COS_READ_SIDE_OFFSET_DB_SCHEMA: "public"
-      READ_SIDE_HANDLER_SERVICE_HOST: x
-      READ_SIDE_HANDLER_SERVICE_PORT: 50053
       COS_READ_SIDE_CONFIG__HOST__LOGGER_READSIDE: read-handler
       COS_READ_SIDE_CONFIG__PORT__LOGGER_READSIDE: 50053
       JAVA_OPTS: "-Dconfig.resource=docker.conf"
 
   postgres:
     image: postgres:9.6
+    container_name: postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
@@ -109,6 +108,7 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4:4.24
+    container_name: pagdmin
     environment:
       PGADMIN_DEFAULT_EMAIL: "admin@namely.com"
       PGADMIN_DEFAULT_PASSWORD: "admin"

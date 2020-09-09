@@ -9,7 +9,6 @@ from concurrent import futures
 
 def run(port):
     configure_logging()
-    logging.info(f"starting server, {port}")
     # define grpc server
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     # add grpc implementation to server
@@ -18,6 +17,7 @@ def run(port):
     server.add_insecure_port(f'[::]:{port}')
     # start
     server.start()
+    logging.info(f"started server, {port}")
     server.wait_for_termination()
     logging.info("killing server")
 

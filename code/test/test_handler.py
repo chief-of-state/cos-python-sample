@@ -3,8 +3,8 @@ from sample_app.api_pb2 import AppendRequest, GetRequest, CreateRequest
 from sample_app.events_pb2 import AppendEvent, CreateEvent
 from sample_app.state_pb2 import State
 from google.protobuf.json_format import MessageToJson
-from chief_of_state.writeside_pb2_grpc import WriteSideHandlerServiceStub
-from chief_of_state.writeside_pb2 import (
+from chief_of_state.v1.writeside_pb2_grpc import WriteSideHandlerServiceStub
+from chief_of_state.v1.writeside_pb2 import (
     HandleCommandRequest,
     HandleCommandResponse,
     HandleEventRequest,
@@ -12,7 +12,7 @@ from chief_of_state.writeside_pb2 import (
     PersistAndReply,
     Reply
 )
-from chief_of_state.common_pb2 import MetaData
+from chief_of_state.v1.common_pb2 import MetaData
 from google.protobuf.any_pb2 import Any
 from cos_helpers.grpc import get_channel
 from cos_helpers.proto import ProtoHelper
@@ -23,10 +23,9 @@ class TestHandler():
         channel = get_channel(host, port)
         stub = WriteSideHandlerServiceStub(channel)
 
-        # TestHandler.handleCommandCreate(stub)
-        # TestHandler.handleCommandAppend(stub)
-        # TestHandler.handleCommandGet(stub)
-
+        TestHandler.handleCommandCreate(stub)
+        TestHandler.handleCommandAppend(stub)
+        TestHandler.handleCommandGet(stub)
         TestHandler.testFailure(stub)
 
     @staticmethod

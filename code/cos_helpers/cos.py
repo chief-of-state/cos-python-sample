@@ -1,5 +1,5 @@
-from chief_of_state.writeside_pb2 import PersistAndReply, Reply, HandleEventResponse
-from chief_of_state.writeside_pb2 import HandleCommandResponse, HandleEventResponse
+from chief_of_state.v1.writeside_pb2 import PersistAndReply, Reply, HandleEventResponse
+from chief_of_state.v1.writeside_pb2 import HandleCommandResponse, HandleEventResponse
 from google.protobuf.any_pb2 import Any
 
 

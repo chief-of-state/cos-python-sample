@@ -11,18 +11,24 @@ manages an array of strings and accepts [requests](./proto/sample_app/api.proto)
 ### Quickstart
 
 ```bash
+# download earth
+brew install earthly
+
 # updates submodules, generates protobufs
-make setup
+earth +all
 
 # starts all containers
-make up
+docker-compose up -d
 
 # see containers
-make ps
-
-# supervise logs
-make logs
+docker-compose ps
 
 # run sample commands
-make test
+docker-compose exec test-client python -m test
+
+# supervise app logs
+docker-compose logs -f --tail="all" api write-handler read-handler
+
+# cos logs
+docker-compose logs -f chiefofstate
 ```

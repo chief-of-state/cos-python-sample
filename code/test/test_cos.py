@@ -2,11 +2,12 @@ from sample_app.api_pb2_grpc import SampleServiceStub
 from sample_app.api_pb2 import AppendRequest, CreateRequest
 from sample_app.events_pb2 import AppendEvent, CreateEvent
 from sample_app.state_pb2 import State
-from chief_of_state.service_pb2_grpc import ChiefOfStateServiceStub
-from chief_of_state.service_pb2 import ProcessCommandRequest
+from chief_of_state.v1.service_pb2_grpc import ChiefOfStateServiceStub
+from chief_of_state.v1.service_pb2 import ProcessCommandRequest, GetStateRequest
 from cos_helpers.proto import ProtoHelper
 from cos_helpers.grpc import get_channel
 from uuid import uuid4
+from grpc import StatusCode
 
 
 class TestCos():
@@ -20,6 +21,7 @@ class TestCos():
         TestCos._test_append(stub, id)
         TestCos._test_fail_append(stub)
         TestCos._test_fail_id(stub)
+        TestCos._test_fail_get(stub)
 
     @staticmethod
     def _test_create(stub, id):
@@ -108,6 +110,24 @@ class TestCos():
 
         assert did_fail
 
+
+    @staticmethod
+    def _test_fail_get(stub):
+        print("TestCos.fail_get")
+        did_fail = False
+
+        # create a command
+        command = GetStateRequest(entity_id="not-an-id")
+
+        # wrap in COS request
+        try:
+            stub.GetState(command)
+
+        except Exception as e:
+            did_fail = True
+            assert e.code() == StatusCode.NOT_FOUND, f'wrong error code, {e.code()}'
+
+        assert did_fail
 
 if __name__ == '__main__':
     TestCos.run()

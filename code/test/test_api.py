@@ -3,6 +3,7 @@ from sample_app.api_pb2 import AppendRequest, GetRequest, CreateRequest
 from sample_app.state_pb2 import State
 from cos_helpers.grpc import get_channel
 from uuid import uuid4
+import grpc
 
 class TestApi():
     @staticmethod
@@ -21,7 +22,8 @@ class TestApi():
         for id in ids:
             TestApi.get(stub, id)
 
-        TestApi.api_failure(stub)
+        TestApi.get_failure(stub)
+        TestApi.handler_failure_id(stub)
         TestApi.handler_validation_failure(stub)
 
     @staticmethod
@@ -52,7 +54,7 @@ class TestApi():
         assert response.id == id
 
     @staticmethod
-    def api_failure(stub):
+    def handler_failure_id(stub):
         print("TestApi.handler_failure_id")
         request = AppendRequest(id = "", append="value") # will throw
         did_fail = False
@@ -62,6 +64,20 @@ class TestApi():
         except Exception as e:
             did_fail = True
             assert "empty entity id" in e.details().lower(), f"wrong error, {e.details()}"
+
+        assert did_fail, "did not fail"
+
+    def get_failure(stub):
+        print("TestApi.get_failure")
+        request = GetRequest(id = "not-an-id")
+        did_fail = True
+        try:
+            response = stub.GetCall(request)
+            did_fail = False
+        except grpc.RpcError as e:
+            assert "not_found" in e.details().lower(), f"wrong error, {e.details()}"
+        except Exception as e:
+            raise Exception(f'wrong error, {e.details()}')
 
         assert did_fail, "did not fail"
 
