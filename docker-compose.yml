@@ -102,7 +102,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
       POSTGRES_DB: postgres
     volumes:
-      - ./docker/init-db.sql/:/docker-entrypoint-initdb.d/init-db.sql:delegated
+      - ./config/init-db.sql/:/docker-entrypoint-initdb.d/init-db.sql:delegated
     ports:
       - "5432:5432"
 
@@ -116,7 +116,7 @@ services:
     ports:
       - 5050:80
     volumes:
-      - ./docker/pgadmin-servers.json:/etc/pgadmin4/pgadmin-servers.json
+      - ./config/pgadmin-servers.json:/etc/pgadmin4/pgadmin-servers.json
 
   # tracer:
   #   image: jaegertracing/all-in-one:1.17
@@ -130,14 +130,14 @@ services:
   # grafana:
   #   image: grafana/grafana
   #   volumes:
-  #     - ./docker/grafana-prometheus.yml:/etc/grafana/provisioning/datasources/prometheus.yml
+  #     - ./config/grafana-prometheus.yml:/etc/grafana/provisioning/datasources/prometheus.yml
   #   ports:
   #     - "3000:3000"
 
   # prometheus:
   #   image: prom/prometheus:v2.1.0
   #   volumes:
-  #     - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml
+  #     - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
   #   command:
   #     - "--config.file=/etc/prometheus/prometheus.yml"
   #   ports:
