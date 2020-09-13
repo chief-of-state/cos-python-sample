@@ -27,6 +27,8 @@ services:
       - 50052
     environment:
       APP_PORT: "50052"
+    volumes:
+      - ./code:/app:delegated
 
   read-handler:
     image: cos-python-sample:dev
@@ -53,11 +55,11 @@ services:
       WRITE_HANDLER_PORT: "50052"
       COS_HOST: chiefofstate
       COS_PORT: "9000"
-    # volumes:
-    #   - ./code/test:/app/test:delegated
+    volumes:
+      - ./code:/app:delegated
 
   chiefofstate:
-    image: registry.namely.land/namely/chief-of-state:dev
+    image: registry.namely.land/namely/chief-of-state:08be370
     container_name: chiefofstate
     hostname: chiefofstate
     depends_on:

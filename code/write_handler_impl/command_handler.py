@@ -1,8 +1,8 @@
 from sample_app.api_pb2 import AppendRequest, GetRequest, CreateRequest
 from sample_app.events_pb2 import AppendEvent, CreateEvent
 from sample_app.state_pb2 import State
-from chief_of_state.v1.writeside_pb2 import PersistAndReply, PersistAndReply, Reply, HandleEventResponse
-from cos_helpers.cos import CosEventReplyTypes
+from chief_of_state.v1.writeside_pb2 import HandleEventResponse
+from cos_helpers.cos import CosCommandResponses
 from cos_helpers.proto import ProtoHelper
 import logging
 
@@ -34,7 +34,7 @@ class CommandHandler():
             )
 
         elif ("GetRequest" in command.type_url):
-            return CosEventReplyTypes.reply()
+            return CosCommandResponses.no_event()
 
         else:
             raise Exception(f"unknown type {command.type_url}")
@@ -52,11 +52,11 @@ class CommandHandler():
         if not real_current_state.id:
             assert real_command.id, "ID required"
             event = CreateEvent(id=real_command.id)
-            output = CosEventReplyTypes.persist_and_reply(event)
+            output = CosCommandResponses.event(event)
             return output
         else:
             logger.warn("duplicate ID created, returning state")
-            return CosEventReplyTypes.reply()
+            return CosCommandResponses.no_event()
 
 
     @staticmethod
@@ -70,7 +70,7 @@ class CommandHandler():
         real_current_state = ProtoHelper.unpack_any(current_state, State)
 
         if real_command.append == "no-op":
-            return CosEventReplyTypes.reply()
+            return CosCommandResponses.no_event()
 
         # do validation
         assert isinstance(real_command, AppendRequest), 'unpack event failed'
@@ -82,4 +82,4 @@ class CommandHandler():
         event.id = real_command.id
         event.appended = real_command.append
 
-        return CosEventReplyTypes.persist_and_reply(event)
+        return CosCommandResponses.event(event)

@@ -8,9 +8,7 @@ from chief_of_state.v1.writeside_pb2 import (
     HandleCommandRequest,
     HandleCommandResponse,
     HandleEventRequest,
-    HandleEventResponse,
-    PersistAndReply,
-    Reply
+    HandleEventResponse
 )
 from chief_of_state.v1.common_pb2 import MetaData
 from google.protobuf.any_pb2 import Any
@@ -47,7 +45,7 @@ class TestHandler():
         assert isinstance(response, HandleCommandResponse)
 
         response_event = CreateEvent()
-        response.persist_and_reply.event.Unpack(response_event)
+        response.event.Unpack(response_event)
 
         assert response_event.id == id
 
@@ -73,7 +71,7 @@ class TestHandler():
         assert isinstance(response, HandleCommandResponse)
 
         response_event = AppendEvent()
-        response.persist_and_reply.event.Unpack(response_event)
+        response.event.Unpack(response_event)
 
         assert response_event.id == id
         assert response_event.appended == value
@@ -97,7 +95,7 @@ class TestHandler():
         response = stub.HandleCommand(request)
 
         assert isinstance(response, HandleCommandResponse)
-        assert response.HasField("reply")
+        assert not response.HasField("event"), "expecting null event"
 
     def testFailure(stub):
         print("TestHandler.testFailure")
