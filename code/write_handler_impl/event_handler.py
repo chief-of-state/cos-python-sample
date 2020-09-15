@@ -1,52 +1,71 @@
 import logging
-from sample_app.events_pb2 import AppendEvent, CreateEvent
-from sample_app.state_pb2 import State
-from chief_of_state.v1.writeside_pb2 import HandleEventResponse
-from cos_helpers.proto import ProtoHelper
+from google.protobuf.any_pb2 import Any
+from chief_of_state.v1.writeside_pb2 import HandleEventRequest, HandleEventResponse
+from chief_of_state.v1.common_pb2 import MetaData
+from banking_app.state_pb2 import BankAccount
+from banking_app.events_pb2 import *
+from shared.proto import *
 
 
 logger = logging.getLogger(__name__)
 
 class EventHandler():
-    @staticmethod
-    def handle_event(event, current_state, meta):
-        if ('AppendEvent' in event.type_url):
-            return EventHandler._handle_append(event, current_state, meta)
+    @classmethod
+    def handle_event(cls, request: HandleEventRequest):
 
-        elif ('CreateEvent' in event.type_url):
-            return EventHandler._handle_create(event, current_state, meta)
-
+        current_state = get_field(request, "current_state")
+        if current_state.type_url.endswith("google.protobuf.Empty"):
+            None
         else:
-            raise Exception(f'unhandled event {event.type_url}')
+            current_state = unpack_any(current_state, BankAccount)
 
+        if request.event.type_url.endswith("AccountOpened"):
+            event = unpack_any(request.event, AccountOpened)
+            return cls._handle_open(event)
 
-    def _handle_append(event, current_state, meta):
-        real_current_state = ProtoHelper.unpack_any(current_state, State)
-        real_event = ProtoHelper.unpack_any(event, AppendEvent)
+        elif request.event.type_url.endswith("AccountDebited"):
+            event = unpack_any(request.event, AccountDebited)
+            return EventHandler._handle_debit(event, current_state)
 
-        # build new state
-        new_state = State()
-        new_state.CopyFrom(real_current_state)
-        new_state.id = real_event.id
+        elif request.event.type_url.endswith("AccountCredited"):
+            event = unpack_any(request.event, AccountCredited)
+            return EventHandler._handle_credit(event, current_state)
 
-        new_state.values.append(real_event.appended)
+        raise Exception(f'unhandled event {event.type_url}')
+
+    @staticmethod
+    def _handle_open(event: AccountOpened):
+        '''handle account opened'''
+
+        new_state = BankAccount(
+            account_id = event.account_id,
+            account_balance = event.balance,
+            account_owner = event.account_owner,
+            is_closed = False
+        )
 
         # create return
-        any_new_state = ProtoHelper.pack_any(new_state)
-
         response = HandleEventResponse()
-        response.resulting_state.CopyFrom(any_new_state)
+        response.resulting_state.CopyFrom(pack_any(new_state))
+        return response
 
+    def _handle_debit(event: AccountDebited, current_state: BankAccount):
+        '''handle debit'''
+        new_state = BankAccount()
+        new_state.CopyFrom(current_state)
+        new_state.account_balance -= event.amount
+        # create return
+        response = HandleEventResponse()
+        response.resulting_state.CopyFrom(pack_any(new_state))
         return response
 
 
-    def _handle_create(event, current_state, meta):
-        real_event = ProtoHelper.unpack_any(event, CreateEvent)
-
-        new_state = State(id = real_event.id)
-        any_new_state = ProtoHelper.pack_any(new_state)
-
+    def _handle_credit(event: AccountCredited, current_state: BankAccount):
+        '''handle credit'''
+        new_state = BankAccount()
+        new_state.CopyFrom(current_state)
+        new_state.account_balance += event.amount
+        # create return
         response = HandleEventResponse()
-        response.resulting_state.CopyFrom(any_new_state)
-
+        response.resulting_state.CopyFrom(pack_any(new_state))
         return response

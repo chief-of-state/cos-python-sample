@@ -6,9 +6,9 @@ services:
     entrypoint:
       - python
       - -m
-      - sample_app_impl
+      - banking_app_impl
     ports:
-      - 9010
+      - 9999:9010
     environment:
       COS_HOST: "chiefofstate"
       COS_PORT: "9000"
@@ -59,7 +59,7 @@ services:
       - ./code:/app:delegated
 
   chiefofstate:
-    image: registry.namely.land/namely/chief-of-state:08be370
+    image: registry.namely.land/namely/chief-of-state:0.2-beta.1
     container_name: chiefofstate
     hostname: chiefofstate
     depends_on:

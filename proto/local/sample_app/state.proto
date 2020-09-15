@@ -1,8 +1,0 @@
-syntax = "proto3";
-
-package com.namely.protobuf.chief_of_state.samples;
-
-message State {
-  string id = 1;
-  repeated string values = 2;
-}

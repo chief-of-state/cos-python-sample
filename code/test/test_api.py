@@ -1,8 +1,8 @@
 from sample_app.api_pb2_grpc import SampleServiceStub
 from sample_app.api_pb2 import AppendRequest, GetRequest, CreateRequest
 from sample_app.state_pb2 import State
-from cos_helpers.grpc import get_channel
-from cos_helpers.proto import ProtoHelper
+from shared.grpc import get_channel
+from shared.proto import ProtoHelper
 from google.protobuf.empty_pb2 import Empty
 from uuid import uuid4
 import grpc

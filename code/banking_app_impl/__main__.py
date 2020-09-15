@@ -1,10 +1,10 @@
-from sample_app_impl.service import SampleServiceImpl
-from cos_helpers.logging import configure_logging
-from sample_app.api_pb2_grpc import add_SampleServiceServicer_to_server
 import os
-import logging
 import grpc
+import logging
 from concurrent import futures
+from shared.logging import configure_logging
+from banking_app_impl.service import BankingServiceImpl
+from banking_app.api_pb2_grpc import add_BankAccountServiceServicer_to_server as register
 
 
 def run(port):
@@ -12,7 +12,7 @@ def run(port):
     # define grpc server
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     # add grpc implementation to server
-    add_SampleServiceServicer_to_server(SampleServiceImpl(), server)
+    register(BankingServiceImpl(), server)
     # set port
     server.add_insecure_port(f'[::]:{port}')
     # start

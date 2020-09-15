@@ -1,85 +1,88 @@
-from sample_app.api_pb2 import AppendRequest, GetRequest, CreateRequest
-from sample_app.events_pb2 import AppendEvent, CreateEvent
-from sample_app.state_pb2 import State
-from chief_of_state.v1.writeside_pb2 import HandleEventResponse
-from cos_helpers.cos import CosCommandResponses
-from cos_helpers.proto import ProtoHelper
 import logging
+from google.protobuf.any_pb2 import Any
+
+from chief_of_state.v1.writeside_pb2 import HandleCommandRequest, HandleCommandResponse
+from chief_of_state.v1.common_pb2 import MetaData
+
+from shared.proto import unpack_any, get_field, pack_any, to_json
+from shared.grpc import validate
+
+from banking_app.state_pb2 import BankAccount
+from banking_app.api_pb2 import *
+from banking_app.events_pb2 import *
 
 
 logger = logging.getLogger(__name__)
 
 class CommandHandler():
 
-    @staticmethod
-    def handle_command(command, current_state, meta):
+    def __init__(self, context):
+        self.context = context
+
+    def handle_command(self, request: HandleCommandRequest):
         '''
         general command handler that matches on command type url
         and runs appropriate handler method
         '''
         logger.info(f"CommandHandler.handle_command")
 
-        if ("CreateRequest" in command.type_url):
-            return CommandHandler._handle_create(
-                command = command,
-                current_state = current_state,
-                meta = meta
-            )
-
-        elif ("AppendRequest" in command.type_url):
-            return CommandHandler._handle_append(
-                command = command,
-                current_state = current_state,
-                meta = meta
-            )
-
-        elif ("GetRequest" in command.type_url):
-            return CosCommandResponses.no_event()
-
+        # unpack current state
+        current_state: Any = get_field(request, "current_state")
+        if current_state.type_url.endswith("google.protobuf.Empty"):
+            current_state = BankAccount()
         else:
-            raise Exception(f"unknown type {command.type_url}")
+            current_state = unpack_any(current_state, BankAccount)
 
+        if request.command.type_url.endswith('OpenAccountRequest'):
+            command: OpenAccountRequest = unpack_any(request.command, OpenAccountRequest)
+            return self._open_account(command, request.meta)
 
-    @staticmethod
-    def _handle_create(command, current_state, meta):
-        '''validate CreateCommand and produce Event'''
+        elif request.command.type_url.endswith('DebitAccountRequest'):
+            command: DebitAccountRequest = unpack_any(request.command, DebitAccountRequest)
+            return self._debit_account(command, current_state, request.meta)
 
-        logger.debug("CommandHandler._handle_create")
+        elif request.command.type_url.endswith('CreditAccountRequest'):
+            command: CreditAccountRequest = unpack_any(request.command, CreditAccountRequest)
+            return self._credit_account(command, current_state, request.meta)
 
-        real_command = ProtoHelper.unpack_any(command, CreateRequest)
-        real_current_state = ProtoHelper.unpack_any(current_state, State)
+        elif request.command.type_url.endswith('GetAccountRequest'):
+            return HandleCommandResponse()
 
-        if not real_current_state.id:
-            assert real_command.id, "ID required"
-            event = CreateEvent(id=real_command.id)
-            output = CosCommandResponses.event(event)
-            return output
-        else:
-            logger.warn("duplicate ID created, returning state")
-            return CosCommandResponses.no_event()
+        raise Exception(f"unknown type {request.command.type_url}")
 
+    def _open_account(self, command: OpenAccountRequest, meta: MetaData):
+        '''handle open account command'''
 
-    @staticmethod
-    def _handle_append(command, current_state, meta):
-        '''validate AppendRequest and produce an Event'''
+        # the first event results in revision 1, so it can expect revision 0 prior
+        validate(meta.revision_number == 0, "account already exists")(self.context)
 
-        logger.debug("CommandHandler._handle_append")
+        event = AccountOpened(
+            account_id=meta.entity_id,
+            balance=command.balance,
+            account_owner=command.account_owner
+        )
 
-        # unpack inner command/event
-        real_command = ProtoHelper.unpack_any(command, AppendRequest)
-        real_current_state = ProtoHelper.unpack_any(current_state, State)
+        return HandleCommandResponse(event=pack_any(event))
 
-        if real_command.append == "no-op":
-            return CosCommandResponses.no_event()
+    def _debit_account(self, command: DebitAccountRequest, current_state: BankAccount, meta: MetaData):
+        '''handle debit'''
+        validate(current_state is not None, "account not found")(self.context)
+        validate(current_state.account_balance - command.amount >= 0, "insufficient funds")(self.context)
 
-        # do validation
-        assert isinstance(real_command, AppendRequest), 'unpack event failed'
-        assert isinstance(real_current_state, State), 'unpack state failed'
-        assert real_command.append, f"cannot append empty value"
+        event = AccountDebited(
+            account_id=current_state.account_id,
+            amount=command.amount
+        )
 
-        # make event
-        event = AppendEvent()
-        event.id = real_command.id
-        event.appended = real_command.append
+        return HandleCommandResponse(event=pack_any(event))
 
-        return CosCommandResponses.event(event)
+    def _credit_account(self, command: CreditAccountRequest, current_state: BankAccount, meta: MetaData):
+        '''handle credit'''
+        validate(current_state is not None, "account not found")(self.context)
+
+        event = AccountCredited(
+            account_id=current_state.account_id,
+            amount=command.amount
+        )
+
+        return HandleCommandResponse(event=pack_any(event))

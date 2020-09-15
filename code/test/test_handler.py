@@ -12,8 +12,8 @@ from chief_of_state.v1.writeside_pb2 import (
 )
 from chief_of_state.v1.common_pb2 import MetaData
 from google.protobuf.any_pb2 import Any
-from cos_helpers.grpc import get_channel
-from cos_helpers.proto import ProtoHelper
+from shared.grpc import get_channel
+from shared.proto import ProtoHelper
 
 class TestHandler():
     @staticmethod

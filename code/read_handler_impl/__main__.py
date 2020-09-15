@@ -3,14 +3,14 @@ import logging
 import grpc
 from concurrent import futures
 from read_handler_impl.service import ReadSideHandlerImpl
-from chief_of_state.v1.readside_pb2_grpc import add_ReadSideHandlerServiceServicer_to_server
-from cos_helpers.logging import configure_logging
+from chief_of_state.v1.readside_pb2_grpc import add_ReadSideHandlerServiceServicer_to_server as register
+from shared.logging import configure_logging
 
 
 def run(port):
     configure_logging()
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    add_ReadSideHandlerServiceServicer_to_server(ReadSideHandlerImpl(), server)
+    register(ReadSideHandlerImpl(), server)
     server.add_insecure_port(f'[::]:{port}')
     server.start()
     logging.info(f"started server, {port}")

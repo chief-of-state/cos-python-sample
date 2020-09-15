@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package com.namely.protobuf.account;
+
+
+message AccountOpened {
+  string account_id = 1;
+  double balance = 2;
+  string account_owner = 3;
+}
+
+message AccountDebited {
+  string account_id = 1;
+  double amount = 2;
+}
+
+message AccountCredited {
+  string account_id = 1;
+  double amount = 2;
+}
