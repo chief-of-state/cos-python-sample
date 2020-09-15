@@ -20,6 +20,9 @@ code
 ### Quickstart
 
 ```bash
+# update submodules
+git submodule update --init
+
 # download earth
 brew install earthly
 
