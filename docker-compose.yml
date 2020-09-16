@@ -59,7 +59,7 @@ services:
       - ./code:/app:delegated
 
   chiefofstate:
-    image: registry.namely.land/namely/chief-of-state:0.2-beta.1
+    image: registry.namely.land/namely/chief-of-state:0.2-beta.2
     container_name: chiefofstate
     hostname: chiefofstate
     depends_on:
