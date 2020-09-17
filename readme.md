@@ -32,6 +32,9 @@ earth +all
 # starts all containers
 docker-compose up -d
 
+# create sample traffic
+docker-compose exec test-client python -m test_client
+
 # OTHER HELPFUL COMMANDS
 
 # only generate protobufs locally

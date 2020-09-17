@@ -1,9 +1,16 @@
-from test.test_api import TestApi
-from test.test_handler import TestHandler
-from test.test_cos import TestCos
+from test_client.test_handler import TestHandler
+from test_client.test_cos import TestCos
+from test_client.test_api import TestApi
+from shared.logging import configure_logging
+import logging
 import os
 
+
 if __name__ == '__main__':
+
+    configure_logging()
+
+    logger = logging.getLogger("main")
 
     write_handler_host = os.environ.get("WRITE_HANDLER_HOST") or "write-handler"
     write_handler_port = os.environ.get("WRITE_HANDLER_PORT")
@@ -14,6 +21,10 @@ if __name__ == '__main__':
     api_host = os.environ.get("API_HOST") or "api"
     api_port = os.environ.get("API_PORT")
 
+    logger.info("BEGIN TESTS")
+
     TestHandler.run(host = write_handler_host, port = write_handler_port)
     TestCos.run(host = cos_host, port = cos_port)
     TestApi.run(host = api_host, port = api_port)
+
+    logger.info("END TESTS")

@@ -1,5 +1,6 @@
 import logging
 from google.protobuf.any_pb2 import Any
+from grpc import StatusCode
 
 from chief_of_state.v1.writeside_pb2 import HandleCommandRequest, HandleCommandResponse
 from chief_of_state.v1.common_pb2 import MetaData
@@ -19,42 +20,47 @@ class CommandHandler():
     def __init__(self, context):
         self.context = context
 
+        self.command_router = {
+            'OpenAccountRequest': self._open_account,
+            'DebitAccountRequest': self._debit_account,
+            'CreditAccountRequest': self._credit_account,
+            'GetAccountRequest': self._no_op
+        }
+
+
     def handle_command(self, request: HandleCommandRequest):
         '''
         general command handler that matches on command type url
         and runs appropriate handler method
         '''
-        logger.info(f"CommandHandler.handle_command")
 
         # unpack current state
-        current_state: Any = get_field(request, "current_state")
-        if current_state.type_url.endswith("google.protobuf.Empty"):
-            current_state = BankAccount()
-        else:
-            current_state = unpack_any(current_state, BankAccount)
+        current_state = None
 
-        if request.command.type_url.endswith('OpenAccountRequest'):
-            command: OpenAccountRequest = unpack_any(request.command, OpenAccountRequest)
-            return self._open_account(command, request.meta)
+        current_state_any: Any = get_field(request, "current_state")
+        validate(current_state_any is not None, error_code=StatusCode.INTERNAL)(self.context)
 
-        elif request.command.type_url.endswith('DebitAccountRequest'):
-            command: DebitAccountRequest = unpack_any(request.command, DebitAccountRequest)
-            return self._debit_account(command, current_state, request.meta)
+        if not current_state_any.type_url.endswith("google.protobuf.Empty"):
+            current_state = unpack_any(current_state_any, BankAccount)
 
-        elif request.command.type_url.endswith('CreditAccountRequest'):
-            command: CreditAccountRequest = unpack_any(request.command, CreditAccountRequest)
-            return self._credit_account(command, current_state, request.meta)
+        # get the handler by type url
+        handler_key = request.command.type_url.split('.')[-1]
+        logger.info(f"handling command {handler_key}")
 
-        elif request.command.type_url.endswith('GetAccountRequest'):
-            return HandleCommandResponse()
+        handler = self.command_router.get(handler_key)
 
-        raise Exception(f"unknown type {request.command.type_url}")
+        if not handler:
+            raise Exception(f"unknown type {request.command.type_url}")
 
-    def _open_account(self, command: OpenAccountRequest, meta: MetaData):
+        return handler(request, current_state, request.meta)
+
+    def _open_account(self, request: HandleCommandRequest, current_state: BankAccount, meta: MetaData):
         '''handle open account command'''
 
         # the first event results in revision 1, so it can expect revision 0 prior
         validate(meta.revision_number == 0, "account already exists")(self.context)
+
+        command: OpenAccountRequest = unpack_any(request.command, OpenAccountRequest)
 
         event = AccountOpened(
             account_id=meta.entity_id,
@@ -64,9 +70,11 @@ class CommandHandler():
 
         return HandleCommandResponse(event=pack_any(event))
 
-    def _debit_account(self, command: DebitAccountRequest, current_state: BankAccount, meta: MetaData):
+    def _debit_account(self, request: HandleCommandRequest, current_state: BankAccount, meta: MetaData):
         '''handle debit'''
-        validate(current_state is not None, "account not found")(self.context)
+        validate(meta.revision_number > 0, "account not found")(self.context)
+
+        command: DebitAccountRequest = unpack_any(request.command, DebitAccountRequest)
         validate(current_state.account_balance - command.amount >= 0, "insufficient funds")(self.context)
 
         event = AccountDebited(
@@ -76,9 +84,18 @@ class CommandHandler():
 
         return HandleCommandResponse(event=pack_any(event))
 
-    def _credit_account(self, command: CreditAccountRequest, current_state: BankAccount, meta: MetaData):
+    def _credit_account(self, request: HandleCommandRequest, current_state: BankAccount, meta: MetaData):
         '''handle credit'''
-        validate(current_state is not None, "account not found")(self.context)
+
+        validate(meta.revision_number > 0, "account not found")(self.context)
+
+        command: CreditAccountRequest = unpack_any(request.command, CreditAccountRequest)
+
+        validate(command.amount >= 0, "credit must be positive")(self.context)
+
+        # if crediting $0, return a no-op
+        if command.amount == 0:
+            return HandleCommandResponse()
 
         event = AccountCredited(
             account_id=current_state.account_id,
@@ -86,3 +103,6 @@ class CommandHandler():
         )
 
         return HandleCommandResponse(event=pack_any(event))
+
+    def _no_op(self, *args, **kwargs):
+        return HandleCommandResponse()

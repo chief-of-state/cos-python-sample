@@ -30,7 +30,7 @@ build-package:
         code/read_handler_impl \
         code/write_handler_impl \
         code/banking_app_impl \
-        code/test \
+        code/test_client \
         .
 
     SAVE IMAGE cos-python-sample:${VERSION}

@@ -18,6 +18,7 @@ from banking_app.api_pb2 import (
 from shared.proto import unpack_any, pack_any, to_json
 from shared.grpc import validate, get_channel
 from uuid import uuid4
+import grpc
 
 
 logger = logging.getLogger(__name__)
@@ -35,7 +36,7 @@ class BankingServiceImpl(BankAccountServiceServicer):
 
         account_id = str(uuid4())
         result = self._cos_process_command(id=account_id, command=request)
-        validate(result is not None, "state was none", StatusCode.INTERNAL)
+        validate(result is not None, "state was none", StatusCode.INTERNAL)(context)
 
         return ApiResponse(account=result)
 
@@ -45,7 +46,7 @@ class BankingServiceImpl(BankAccountServiceServicer):
 
         logger.info("debiting account")
 
-        validate(request.amount > 0, "amount must be greater than 0")
+        validate(request.amount > 0, "amount must be greater than 0")(context)
 
         result = self._cos_process_command(id=request.account_id, command=request)
         validate(result is not None, "state was none", StatusCode.INTERNAL)(context)
@@ -57,7 +58,7 @@ class BankingServiceImpl(BankAccountServiceServicer):
         '''handle credit account'''
         logger.info("crediting account")
 
-        validate(request.amount > 0, "amount must be greater than 0")
+        validate(request.amount >= 0, "credits must be positive")(context)
 
         result = self._cos_process_command(id=request.account_id, command=request)
         validate(result is not None, "state was none", StatusCode.INTERNAL)(context)
@@ -65,16 +66,25 @@ class BankingServiceImpl(BankAccountServiceServicer):
         return ApiResponse(account=result)
 
 
-    def Get(self, request: GetAccountRequest, context) -> ApiResponse:
+    def Get(self, request: GetAccountRequest, context: grpc.ServicerContext) -> ApiResponse:
         '''handle get request'''
         logger.info("getting account")
         client = self._get_cos_client()
         command = GetStateRequest()
         command.entity_id=request.account_id
-        result = client.GetState(command)
-        validate(result.HasField("state"), "state was none", StatusCode.NOT_FOUND)(context)
-        state = self._cos_unpack_state(result.state)
-        validate(state is not None, "state was none", StatusCode.NOT_FOUND)(context)
+
+        try:
+            result = client.GetState(command)
+            validate(result.HasField("state"), "state was none", StatusCode.NOT_FOUND)(context)
+            state = self._cos_unpack_state(result.state)
+            validate(state is not None, "state was none", StatusCode.NOT_FOUND)(context)
+
+        except grpc.RpcError as e:
+            if e.code() == StatusCode.NOT_FOUND:
+                context.abort(code=e.code(), details=e.details())
+            else:
+                context.abrot(code=StatusCode.INTERNAL, details=e.details())
+
         return ApiResponse(account=state)
 
 

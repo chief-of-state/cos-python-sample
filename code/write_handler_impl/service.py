@@ -11,12 +11,10 @@ logger = logging.getLogger(__name__)
 class WriteSideHandlerImpl(WriteSideHandlerServiceServicer):
 
     def HandleCommand(self, request: HandleCommandRequest, context):
-        logger.info("WriteSideHandlerImpl.HandleCommand")
         # create event from request
         return CommandHandler(context).handle_command(request)
 
     def HandleEvent(self, request: HandleEventRequest, context):
-        logger.info("WriteSideHandlerImpl.HandleEvent")
         # given event and prior state, build a new state
         # this should never fail!
         return EventHandler.handle_event(request)
