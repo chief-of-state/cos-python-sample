@@ -13,7 +13,7 @@ code
 ├── chief_of_state          # generated COS code
 ├── read_handler_impl       # implements the COS read side handler
 ├── shared                  # shared helpers
-├── test                    # test client
+├── test_client             # test client for sample traffic
 └── write_handler_impl      # implements the COS write side handler
 ```
 
