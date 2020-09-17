@@ -33,7 +33,7 @@ build-package:
         code/test_client \
         .
 
-    SAVE IMAGE cos-python-sample:${VERSION}
+    SAVE IMAGE namely/cos-python-sample:${VERSION}
 
 protogen:
     RUN pip install grpcio-tools

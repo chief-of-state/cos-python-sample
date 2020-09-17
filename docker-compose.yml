@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   api:
-    image: cos-python-sample:dev
+    image: namely/cos-python-sample:dev
     container_name: api
     entrypoint:
       - python
@@ -13,11 +13,9 @@ services:
       COS_HOST: "chiefofstate"
       COS_PORT: "9000"
       APP_PORT: "9010"
-    volumes:
-      - ./code:/app:delegated
 
   write-handler:
-    image: cos-python-sample:dev
+    image: namely/cos-python-sample:dev
     container_name: write-handler
     entrypoint:
       - python
@@ -27,11 +25,9 @@ services:
       - 50052
     environment:
       APP_PORT: "50052"
-    volumes:
-      - ./code:/app:delegated
 
   read-handler:
-    image: cos-python-sample:dev
+    image: namely/cos-python-sample:dev
     container_name: read-handler
     entrypoint:
       - python
@@ -43,7 +39,7 @@ services:
       APP_PORT: "50053"
 
   test-client:
-    image: cos-python-sample:dev
+    image: namely/cos-python-sample:dev
     container_name: test-client
     entrypoint:
       - sleep
@@ -55,8 +51,6 @@ services:
       WRITE_HANDLER_PORT: "50052"
       COS_HOST: chiefofstate
       COS_PORT: "9000"
-    volumes:
-      - ./code:/app:delegated
 
   chiefofstate:
     image: registry.namely.land/namely/chief-of-state:0.2-beta.2
