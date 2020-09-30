@@ -39,8 +39,8 @@ class Commands():
 
         request = HandleCommandRequest(
             command=pack_any(cmd),
-            current_state=pack_any(Empty()),
-            meta=MetaData(),
+            prior_state=pack_any(Empty()),
+            prior_event_meta=MetaData(),
         )
 
         response = stub.HandleCommand(request)
@@ -59,7 +59,7 @@ class Commands():
         id = str(uuid4())
 
         command = DebitAccountRequest(account_id=id, amount=1)
-        current_state = BankAccount(
+        prior_state = BankAccount(
             account_id=id,
             account_balance=100,
             account_owner="some owner"
@@ -68,8 +68,8 @@ class Commands():
 
         request = HandleCommandRequest(
             command=pack_any(command),
-            current_state=pack_any(current_state),
-            meta=meta
+            prior_state=pack_any(prior_state),
+            prior_event_meta=meta
         )
 
         response = stub.HandleCommand(request)
@@ -87,7 +87,7 @@ class Commands():
         id = str(uuid4())
 
         command = CreditAccountRequest(account_id=id, amount=1)
-        current_state = BankAccount(
+        prior_state = BankAccount(
             account_id=id,
             account_balance=100,
             account_owner="some owner"
@@ -96,8 +96,8 @@ class Commands():
 
         request = HandleCommandRequest(
             command=pack_any(command),
-            current_state=pack_any(current_state),
-            meta=meta
+            prior_state=pack_any(prior_state),
+            prior_event_meta=meta
         )
 
         response = stub.HandleCommand(request)
@@ -118,8 +118,8 @@ class Commands():
 
         request = HandleCommandRequest(
             command=pack_any(cmd),
-            current_state=pack_any(state),
-            meta=MetaData(),
+            prior_state=pack_any(state),
+            prior_event_meta=MetaData(),
         )
 
         did_fail = False

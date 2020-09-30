@@ -13,11 +13,11 @@ class EventHandler():
     @classmethod
     def handle_event(cls, request: HandleEventRequest):
 
-        current_state = get_field(request, "current_state")
-        if current_state.type_url.endswith("google.protobuf.Empty"):
+        prior_state = get_field(request, "prior_state")
+        if prior_state.type_url.endswith("google.protobuf.Empty"):
             None
         else:
-            current_state = unpack_any(current_state, BankAccount)
+            prior_state = unpack_any(prior_state, BankAccount)
 
         if request.event.type_url.endswith("AccountOpened"):
             event = unpack_any(request.event, AccountOpened)
@@ -25,11 +25,11 @@ class EventHandler():
 
         elif request.event.type_url.endswith("AccountDebited"):
             event = unpack_any(request.event, AccountDebited)
-            return EventHandler._handle_debit(event, current_state)
+            return EventHandler._handle_debit(event, prior_state)
 
         elif request.event.type_url.endswith("AccountCredited"):
             event = unpack_any(request.event, AccountCredited)
-            return EventHandler._handle_credit(event, current_state)
+            return EventHandler._handle_credit(event, prior_state)
 
         raise Exception(f'unhandled event {event.type_url}')
 
@@ -49,10 +49,10 @@ class EventHandler():
         response.resulting_state.CopyFrom(pack_any(new_state))
         return response
 
-    def _handle_debit(event: AccountDebited, current_state: BankAccount):
+    def _handle_debit(event: AccountDebited, prior_state: BankAccount):
         '''handle debit'''
         new_state = BankAccount()
-        new_state.CopyFrom(current_state)
+        new_state.CopyFrom(prior_state)
         new_state.account_balance -= event.amount
         # create return
         response = HandleEventResponse()
@@ -60,10 +60,10 @@ class EventHandler():
         return response
 
 
-    def _handle_credit(event: AccountCredited, current_state: BankAccount):
+    def _handle_credit(event: AccountCredited, prior_state: BankAccount):
         '''handle credit'''
         new_state = BankAccount()
-        new_state.CopyFrom(current_state)
+        new_state.CopyFrom(prior_state)
         new_state.account_balance += event.amount
         # create return
         response = HandleEventResponse()

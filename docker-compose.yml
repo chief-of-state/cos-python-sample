@@ -51,9 +51,11 @@ services:
       WRITE_HANDLER_PORT: "50052"
       COS_HOST: chiefofstate
       COS_PORT: "9000"
+    volumes:
+        - ./code/test_client:/app/test_client:delegated
 
   chiefofstate:
-    image: registry.namely.land/namely/chief-of-state:0.2-beta.2
+    image: registry.namely.land/namely/chief-of-state:0.3-alpha.1
     container_name: chiefofstate
     hostname: chiefofstate
     depends_on:
