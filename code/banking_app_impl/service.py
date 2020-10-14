@@ -114,5 +114,5 @@ class BankingServiceImpl(BankAccountServiceServicer):
     def _get_cos_client():
         host = os.environ.get("COS_HOST")
         port = os.environ.get("COS_PORT")
-        channel = get_channel(host, port)
+        channel = get_channel(host, port, True)
         return ChiefOfStateServiceStub(channel)

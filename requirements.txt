@@ -1,3 +1,5 @@
 protobuf
 googleapis-common-protos
 grpcio
+jaeger-client
+grpcio-opentracing
