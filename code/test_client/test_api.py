@@ -22,6 +22,7 @@ class TestApi():
         TestApi._missing_account(stub)
         TestApi._validation_fail(stub)
         TestApi._not_found(stub)
+        TestApi._rpc_fail(stub)
         TestApi._no_op(stub)
 
         # create and do transactions against many accounts
@@ -105,6 +106,19 @@ class TestApi():
         except grpc.RpcError as e:
             did_fail = True
             assert "amount must be greater than 0" in e.details().lower(), f'wrong error {e.details()}'
+        assert did_fail, 'did not fail'
+
+    @staticmethod
+    def _rpc_fail(stub: BankAccountServiceStub):
+        logger.info("test rpc failure")
+        did_fail = False
+        request = DebitAccountRequest(account_id=str(uuid4()), amount=1)
+        try:
+            stub.DebitAccount(request)
+        except grpc.RpcError as e:
+            did_fail = True
+            assert e.code() == grpc.StatusCode.NOT_FOUND, e
+            assert "account not found" in e.details().lower(), f'wrong error {e.details()}'
         assert did_fail, 'did not fail'
 
     @staticmethod

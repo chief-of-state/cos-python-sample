@@ -35,7 +35,7 @@ class BankingServiceImpl(BankAccountServiceServicer):
         validate(request.balance >= 200, "minimum balance of 200 required")(context)
 
         account_id = str(uuid4())
-        result = self._cos_process_command(id=account_id, command=request)
+        result = self._cos_process_command(id=account_id, command=request, context=context)
         validate(result is not None, "state was none", StatusCode.INTERNAL)(context)
 
         return ApiResponse(account=result)
@@ -48,7 +48,7 @@ class BankingServiceImpl(BankAccountServiceServicer):
 
         validate(request.amount > 0, "amount must be greater than 0")(context)
 
-        result = self._cos_process_command(id=request.account_id, command=request)
+        result = self._cos_process_command(id=request.account_id, command=request, context=context)
         validate(result is not None, "state was none", StatusCode.INTERNAL)(context)
 
         return ApiResponse(account=result)
@@ -60,7 +60,7 @@ class BankingServiceImpl(BankAccountServiceServicer):
 
         validate(request.amount >= 0, "credits must be positive")(context)
 
-        result = self._cos_process_command(id=request.account_id, command=request)
+        result = self._cos_process_command(id=request.account_id, command=request, context=context)
         validate(result is not None, "state was none", StatusCode.INTERNAL)(context)
 
         return ApiResponse(account=result)
@@ -83,20 +83,25 @@ class BankingServiceImpl(BankAccountServiceServicer):
             if e.code() == StatusCode.NOT_FOUND:
                 context.abort(code=e.code(), details=e.details())
             else:
-                context.abrot(code=StatusCode.INTERNAL, details=e.details())
+                context.abort(code=StatusCode.INTERNAL, details=e.details())
 
         return ApiResponse(account=state)
 
 
     @classmethod
-    def _cos_process_command(cls, id, command):
+    def _cos_process_command(cls, id, command, context):
         '''helper method to run process command'''
         logger.debug("begin process_command")
         client = cls._get_cos_client()
         command_any = pack_any(command)
         request = ProcessCommandRequest(entity_id=id, command=command_any)
-        response = client.ProcessCommand(request)
-        return cls._cos_unpack_state(response.state)
+        try:
+            response = client.ProcessCommand(request)
+            return cls._cos_unpack_state(response.state)
+        except grpc.RpcError as e:
+            context.abort(code=e.code(), details=e.details())
+        except Exception as e:
+            context.abort(code=StatusCode.INTERNAL, details=str(e))
 
     @staticmethod
     def _cos_unpack_state(any_state):

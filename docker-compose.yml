@@ -61,7 +61,7 @@ services:
         - ./code/test_client:/app/test_client:delegated
 
   chiefofstate:
-    image: registry.namely.land/namely/chief-of-state:0.3-beta.2
+    image: registry.namely.land/namely/chief-of-state:0.4
     container_name: chiefofstate
     hostname: chiefofstate
     depends_on:

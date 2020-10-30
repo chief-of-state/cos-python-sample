@@ -128,7 +128,7 @@ class Commands():
             stub.HandleCommand(request)
         except grpc.RpcError as e:
             did_fail = True
-            assert e.code() == grpc.StatusCode.INVALID_ARGUMENT, e
+            assert e.code() == grpc.StatusCode.NOT_FOUND, e
             assert e.details() == "account not found", e.details()
 
         assert did_fail, "supposed to fail!"

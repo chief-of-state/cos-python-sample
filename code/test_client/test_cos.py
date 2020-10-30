@@ -29,6 +29,7 @@ class TestCos():
         # test general
         TestCos._no_op(stub)
         TestCos._bad_request(stub)
+        TestCos._bad_request_2(stub)
         TestCos._not_found(stub)
 
     @staticmethod
@@ -115,7 +116,7 @@ class TestCos():
 
     @staticmethod
     def _bad_request(stub):
-        logger.info("bad request")
+        logger.info("bad request (validation)")
         did_fail = False
 
         # wrap in COS request
@@ -131,6 +132,28 @@ class TestCos():
             did_fail = True
             assert e.code() == StatusCode.INVALID_ARGUMENT
             assert 'empty entity id' in e.details().lower()
+
+        assert did_fail
+
+    @staticmethod
+    def _bad_request_2(stub):
+        logger.info("bad request (not found)")
+        did_fail = False
+
+        command = DebitAccountRequest(amount=999)
+
+        # wrap in COS request
+        try:
+            stub.ProcessCommand(
+                ProcessCommandRequest(
+                    entity_id=str(uuid4()),
+                    command=pack_any(command)
+                )
+            )
+
+        except grpc.RpcError as e:
+            did_fail = True
+            assert e.code() == StatusCode.NOT_FOUND
 
         assert did_fail
 

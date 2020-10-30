@@ -72,7 +72,7 @@ class CommandHandler():
 
     def _debit_account(self, request: HandleCommandRequest, prior_state: BankAccount, prior_event_meta: MetaData):
         '''handle debit'''
-        validate(prior_event_meta.revision_number > 0, "account not found")(self.context)
+        validate(prior_event_meta.revision_number > 0, "account not found", StatusCode.NOT_FOUND)(self.context)
 
         command: DebitAccountRequest = unpack_any(request.command, DebitAccountRequest)
         validate(prior_state.account_balance - command.amount >= 0, "insufficient funds")(self.context)
