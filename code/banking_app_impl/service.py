@@ -94,9 +94,12 @@ class BankingServiceImpl(BankAccountServiceServicer):
         logger.debug("begin process_command")
         client = cls._get_cos_client()
         command_any = pack_any(command)
+
+        metadata = [('x-custom-request-uuid', str(uuid4()))]
         request = ProcessCommandRequest(entity_id=id, command=command_any)
+
         try:
-            response = client.ProcessCommand(request)
+            response = client.ProcessCommand(request=request, metadata=metadata)
             return cls._cos_unpack_state(response.state)
         except grpc.RpcError as e:
             context.abort(code=e.code(), details=e.details())

@@ -101,6 +101,7 @@ services:
       COS_READ_SIDE_CONFIG__PORT__LOGGER_READSIDE: 50053
       JAVA_OPTS: "-Dconfig.resource=docker.conf -XX:+UseG1GC"
       COS_STORES_AUTO_CREATE: "true"
+      COS_WRITE_PERSISTED_HEADERS: "x-custom-request-uuid"
 
   postgres:
     image: postgres:9.6
