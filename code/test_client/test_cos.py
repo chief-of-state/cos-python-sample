@@ -155,7 +155,7 @@ class TestCos():
 
         except Exception as e:
             did_fail = True
-            assert 'insufficient funds' in e.details().lower()
+            assert 'account not found' in e.details().lower()
 
         assert did_fail
 
