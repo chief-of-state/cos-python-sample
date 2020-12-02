@@ -20,12 +20,11 @@ logger = logging.getLogger("chief-of-state")
 class TestCos():
     @staticmethod
     def run(host, port):
-        channel = get_channel(host, port)
+        channel = get_channel(host, port, True)
+
         stub = ChiefOfStateServiceStub(channel)
         # test state
         id = str(uuid4())
-        TestCos._create(stub, id)
-        TestCos._update(stub, id)
         TestCos._fail(stub, id)
         # test general
         TestCos._persist_header(stub)
@@ -33,6 +32,8 @@ class TestCos():
         TestCos._bad_request(stub)
         TestCos._bad_request_2(stub)
         TestCos._not_found(stub)
+
+        channel.close()
 
     @staticmethod
     def _persist_header(stub):
@@ -50,14 +51,20 @@ class TestCos():
         meta_key = "x-custom-request-uuid"
         meta_value = str(uuid4)
         metadata = [(meta_key, meta_value)]
-        response = stub.ProcessCommand(request=cos_request, metadata=metadata)
+        # response = stub.ProcessCommand(request=cos_request, metadata=metadata)
+
+        response, call = stub.ProcessCommand.with_call(request=cos_request, metadata=metadata)
+
         output_state = unpack_any(response.state, BankAccount)
+
         persisted_headers = response.meta.data.get("persisted_headers.v1")
+
         assert persisted_headers is not None, "missing persisted_headers.v1"
         persisted_headers = unpack_any(persisted_headers, Headers)
         header = persisted_headers.headers[0]
         assert header.key == meta_key, f"missing key {meta_key}"
         assert header.stringValue == meta_value, f"missing key {meta_value}"
+
 
     @staticmethod
     def _no_op(stub):
@@ -95,6 +102,17 @@ class TestCos():
         assert output_state.account_id == id
         assert output_state.account_balance == 200
         assert output_state.account_owner == "some owner"
+
+    @staticmethod
+    def _get(stub, id):
+        logger.info("get state")
+
+        # create a command
+        command = GetStateRequest(entity_id=id)
+
+        response = stub.GetState(command)
+        output_state = unpack_any(response.state, BankAccount)
+        assert output_state.account_id == id
 
     @staticmethod
     def _update(stub, id):

@@ -2,13 +2,15 @@ from test_client.test_handler import TestHandler
 from test_client.test_cos import TestCos
 from test_client.test_api import TestApi
 from shared.logging import configure_logging
+from shared.grpc import get_tracer
 import logging
 import os
-
 
 if __name__ == '__main__':
 
     configure_logging()
+
+    tracer = get_tracer('test-client')
 
     logger = logging.getLogger("main")
 

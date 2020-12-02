@@ -21,7 +21,8 @@ logger = logging.getLogger('write-handler')
 class TestHandler():
     @staticmethod
     def run(host, port):
-        channel = get_channel(host, port)
+        channel = get_channel(host, port, True)
+
         stub = WriteSideHandlerServiceStub(channel)
 
         Commands._open(stub)

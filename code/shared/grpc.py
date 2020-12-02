@@ -49,6 +49,7 @@ class ServerHelper:
 def get_tracer(service_name):
     config = Config(
         config={
+            'logging': False,
             'sampler': {
                 'type': 'const',
                 'param': 1,

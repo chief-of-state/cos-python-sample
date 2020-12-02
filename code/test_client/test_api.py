@@ -16,7 +16,7 @@ logger = logging.getLogger("banking-app")
 class TestApi():
     @staticmethod
     def run(host, port):
-        channel = get_channel(host, port)
+        channel = get_channel(host, port, True)
         stub = BankAccountServiceStub(channel)
 
         TestApi._missing_account(stub)

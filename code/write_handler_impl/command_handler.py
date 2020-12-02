@@ -87,7 +87,7 @@ class CommandHandler():
     def _credit_account(self, request: HandleCommandRequest, prior_state: BankAccount, prior_event_meta: MetaData):
         '''handle credit'''
 
-        validate(prior_event_meta.revision_number > 0, "account not found")(self.context)
+        validate(prior_event_meta.revision_number > 0, "account not found", StatusCode.NOT_FOUND)(self.context)
 
         command: CreditAccountRequest = unpack_any(request.command, CreditAccountRequest)
 
