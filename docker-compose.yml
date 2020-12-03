@@ -61,7 +61,7 @@ services:
         - ./code/test_client:/app/test_client:delegated
 
   chiefofstate:
-    image: registry.namely.land/namely/chief-of-state:0.6.2-beta.1
+    image: registry.namely.land/namely/chief-of-state:0.6.4
     container_name: chiefofstate
     hostname: chiefofstate
     ports:
