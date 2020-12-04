@@ -23,9 +23,9 @@ class TestCos():
         channel = get_channel(host, port, True)
 
         stub = ChiefOfStateServiceStub(channel)
-        # test state
-        id = str(uuid4())
-        TestCos._fail(stub, id)
+
+        TestCos._fail(stub)
+
         # test general
         TestCos._persist_header(stub)
         TestCos._no_op(stub)
@@ -138,7 +138,7 @@ class TestCos():
 
 
     @staticmethod
-    def _fail(stub, id):
+    def _fail(stub):
         logger.info("fail command")
         did_fail = False
 
@@ -148,7 +148,7 @@ class TestCos():
         try:
             stub.ProcessCommand(
                 ProcessCommandRequest(
-                    entity_id=id,
+                    entity_id=str(uuid4()),
                     command=pack_any(command)
                 )
             )
