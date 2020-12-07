@@ -61,7 +61,7 @@ services:
         - ./code/test_client:/app/test_client:delegated
 
   chiefofstate:
-    image: registry.namely.land/namely/chief-of-state:0.6.4
+    image: registry.namely.land/namely/chief-of-state:0.7
     container_name: chiefofstate
     hostname: chiefofstate
     ports:
@@ -72,33 +72,25 @@ services:
       - 8888
     environment:
       LOG_LEVEL: "INFO"
-      LOG_STYLE: "SIMPLE"
+      LOG_STYLE: "JSON"
+      COS_SERVICE_NAME: "chiefofstate"
       COS_ADDRESS: "0.0.0.0"
       COS_PORT: 9000
-      COS_SERVICE_NAME: "chiefofstate"
-      WRITE_SIDE_HANDLER_SERVICE_HOST: write-handler
-      WRITE_SIDE_HANDLER_SERVICE_PORT: 50052
-      HANDLER_SERVICE_ENABLE_PROTO_VALIDATION: "false"
-      COS_POSTGRES_USER: "postgres"
-      COS_POSTGRES_PASSWORD: "changeme"
-      COS_POSTGRES_HOST: "postgres"
-      COS_POSTGRES_PORT: 5432
-      COS_POSTGRES_DB: "postgres"
-      COS_POSTGRES_SCHEMA: "public"
+      COS_WRITE_SIDE_HOST: write-handler
+      COS_WRITE_SIDE_PORT: 50052
+      COS_DB_CREATE_TABLES: "true"
+      COS_DB_USER: "postgres"
+      COS_DB_PASSWORD: "changeme"
+      COS_DB_HOST: "postgres"
+      COS_DB_PORT: 5432
+      COS_DB_DB: "postgres"
+      COS_DB_SCHEMA: "public"
       COS_EVENTS_BATCH_THRESHOLD: 2
       COS_NUM_SNAPSHOTS_TO_RETAIN: 2
       COS_READ_SIDE_ENABLED: "true"
-      COS_READ_SIDE_OFFSET_DB_HOST: "postgres"
-      COS_READ_SIDE_OFFSET_DB_PORT: 5432
-      COS_READ_SIDE_OFFSET_DB_USER: "postgres"
-      COS_READ_SIDE_OFFSET_DB_PASSWORD: "changeme"
-      COS_READ_SIDE_OFFSET_DB: "postgres"
-      COS_READ_SIDE_OFFSET_DB_SCHEMA: "public"
       COS_READ_SIDE_CONFIG__HOST__LOGGER_READSIDE: read-handler
       COS_READ_SIDE_CONFIG__PORT__LOGGER_READSIDE: 50053
-      JAVA_OPTS: "-Dconfig.resource=docker.conf -XX:+UseG1GC"
       COS_WRITE_PERSISTED_HEADERS: "x-custom-request-uuid"
-      COS_STORES_AUTO_CREATE: "true"
       COS_JAEGER_ENABLED: "true"
       JAEGER_SERVICE_NAME: "chiefofstate"
       JAEGER_ENDPOINT: http://tracer:14268/api/traces
