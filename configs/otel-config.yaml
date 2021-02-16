@@ -1,0 +1,32 @@
+extensions:
+  health_check:
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+
+processors:
+  batch:
+
+exporters:
+  jaeger:
+     endpoint: "tracer:14250"
+     insecure: true
+
+  prometheus:
+    endpoint: "0.0.0.0:9102"
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [jaeger]
+
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [prometheus]
+
+  extensions: [health_check]
