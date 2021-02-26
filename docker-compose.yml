@@ -72,7 +72,7 @@ services:
       - 8888
     environment:
       LOG_LEVEL: "INFO"
-      LOG_STYLE: "JSON"
+      LOG_STYLE: "SIMPLE"
       COS_SERVICE_NAME: "chiefofstate"
       COS_ADDRESS: "0.0.0.0"
       COS_PORT: 9000
