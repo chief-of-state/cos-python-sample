@@ -16,6 +16,8 @@ service BankAccountService {
 message OpenAccountRequest {
   string account_owner = 1;
   double balance = 2;
+  // optional account id, generated if not set
+  string account_id = 3;
 }
 
 message DebitAccountRequest {

@@ -58,7 +58,7 @@ class CommandHandler():
         '''handle open account command'''
 
         # the first event results in revision 1, so it can expect revision 0 prior
-        validate(prior_event_meta.revision_number == 0, "account already exists")(self.context)
+        validate(prior_event_meta.revision_number == 0, "account already exists", StatusCode.ALREADY_EXISTS)(self.context)
 
         command: OpenAccountRequest = unpack_any(request.command, OpenAccountRequest)
 

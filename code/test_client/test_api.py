@@ -19,6 +19,8 @@ class TestApi():
         channel = get_channel(host, port, True)
         stub = BankAccountServiceStub(channel)
 
+        TestApi._consistent_account(stub)
+
         TestApi._missing_account(stub)
         TestApi._validation_fail(stub)
         TestApi._not_found(stub)
@@ -79,6 +81,32 @@ class TestApi():
         assert response.account.account_id==id
         assert response.account.account_balance == prior_balance + 1
         balances[id] = response.account.account_balance
+
+    @staticmethod
+    def _consistent_account(stub: BankAccountServiceStub):
+        logger.info("test consistent account")
+        id = '6ff6f770-7ab4-4161-b7f2-7aff57357065'
+
+        try:
+            # lazily create the account, ignore if already exists
+            cmd = OpenAccountRequest(
+                account_owner="consistent owner",
+                balance=200,
+                account_id=id
+            )
+            stub.OpenAccount(cmd)
+            logger.info(f"created consistent account {id}")
+        except RpcError as e:
+            assert e.code() == StatusCode.ALREADY_EXISTS, f"wrong status code {e.code()}"
+            logger.info(f"found consistent account {id}")
+
+        request = DebitAccountRequest(account_id=id, amount=1)
+        response = stub.DebitAccount(request)
+        assert isinstance(response, ApiResponse)
+        assert response.account.account_id==id
+        logger.info(f"debitted consistent account {id}, balance {response.account.account_balance}")
+
+
 
     @staticmethod
     def _missing_account(stub: BankAccountServiceStub):
