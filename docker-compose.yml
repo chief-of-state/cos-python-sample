@@ -59,7 +59,6 @@ services:
       COS_PORT: "9000"
     volumes:
         - ./code/test_client:/app/test_client:delegated
-        - ./.local/:/app/.local/
 
   chiefofstate:
     image: namely/chief-of-state:0.8-beta.1
