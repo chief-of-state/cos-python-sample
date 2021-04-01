@@ -25,8 +25,8 @@ if __name__ == '__main__':
 
     logger.info("BEGIN TESTS")
 
-    # TestHandler.run(host = write_handler_host, port = write_handler_port)
-    # TestCos.run(host = cos_host, port = cos_port)
+    TestHandler.run(host = write_handler_host, port = write_handler_port)
+    TestCos.run(host = cos_host, port = cos_port)
     TestApi.run(host = api_host, port = api_port)
 
     logger.info("END TESTS")

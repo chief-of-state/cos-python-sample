@@ -3,6 +3,7 @@ import uuid
 import os
 from grpc import StatusCode, ServicerContext
 from google.protobuf.any_pb2 import Any
+from grpc_status import rpc_status
 from chief_of_state.v1.service_pb2_grpc import ChiefOfStateServiceStub
 from chief_of_state.v1.service_pb2 import *
 from banking_app.api_pb2_grpc import BankAccountServiceServicer
@@ -106,7 +107,8 @@ class BankingServiceImpl(BankAccountServiceServicer):
             response = client.ProcessCommand(request=request, metadata=metadata)
             return cls._cos_unpack_state(response.state)
         except grpc.RpcError as e:
-            context.abort(code=e.code(), details=e.details())
+            output_status = rpc_status.from_call(e)
+            context.abort_with_status(rpc_status.to_status(output_status))
         except Exception as e:
             context.abort(code=StatusCode.INTERNAL, details=str(e))
 

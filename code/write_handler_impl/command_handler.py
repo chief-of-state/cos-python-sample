@@ -36,9 +36,8 @@ class CommandHandler():
 
         # unpack current state
         prior_state = None
-
         prior_state_any: Any = get_field(request, "prior_state")
-        validate(prior_state_any is not None, error_code=StatusCode.INTERNAL)(self.context)
+        validate(prior_state_any is not None, "missing prior state", error_code=StatusCode.INTERNAL)(self.context)
 
         if not prior_state_any.type_url.endswith("google.protobuf.Empty"):
             prior_state = unpack_any(prior_state_any, BankAccount)
@@ -61,6 +60,8 @@ class CommandHandler():
         validate(prior_event_meta.revision_number == 0, "account already exists", StatusCode.ALREADY_EXISTS)(self.context)
 
         command: OpenAccountRequest = unpack_any(request.command, OpenAccountRequest)
+
+        validate(command.account_owner, "missing account owner", field_name="account_owner")(self.context)
 
         event = AccountOpened(
             account_id=prior_event_meta.entity_id,

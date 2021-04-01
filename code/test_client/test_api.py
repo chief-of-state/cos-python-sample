@@ -3,6 +3,8 @@ from uuid import uuid4
 import logging
 import grpc
 from grpc import StatusCode, RpcError
+from grpc_status import rpc_status
+from google.rpc import code_pb2, status_pb2, error_details_pb2
 
 from banking_app.api_pb2_grpc import BankAccountServiceStub
 from banking_app.api_pb2 import *
@@ -22,6 +24,8 @@ class TestApi():
         TestApi._consistent_account(stub)
 
         TestApi._missing_account(stub)
+        TestApi._missing_owner_rich_error(stub)
+
         TestApi._validation_fail(stub)
         TestApi._not_found(stub)
         TestApi._rpc_fail(stub)
@@ -106,7 +110,25 @@ class TestApi():
         assert response.account.account_id==id
         logger.info(f"debitted consistent account {id}, balance {response.account.account_balance}")
 
+    @staticmethod
+    def _missing_owner_rich_error(stub: BankAccountServiceStub):
+        logger.info("missing account owner, rich error")
+        # open account request missing the owner
+        cmd = OpenAccountRequest(balance=200)
+        did_fail = False
+        try:
+            stub.OpenAccount(cmd)
+        except RpcError as e:
+            error_status = rpc_status.from_call(e)
+            assert error_status.details, 'missing details'
+            bad_request = unpack_any(error_status.details[0], error_details_pb2.BadRequest)
+            assert bad_request.field_violations, 'missing violations'
+            violation = bad_request.field_violations[0]
+            assert violation.field == "account_owner"
+            assert violation.description == "missing account owner"
+            did_fail = True
 
+        assert did_fail, "did not fail"
 
     @staticmethod
     def _missing_account(stub: BankAccountServiceStub):

@@ -1,6 +1,8 @@
 import grpc
-from grpc import StatusCode
-from google.protobuf.message import Message
+from grpc import StatusCode, RpcError
+from grpc_status import rpc_status
+from google.protobuf import any_pb2
+from google.rpc import code_pb2, status_pb2, error_details_pb2
 import logging
 import signal
 import time
@@ -9,6 +11,7 @@ from grpc_opentracing.grpcext import intercept_server, intercept_channel
 from jaeger_client import Config
 import opentracing
 import os
+from shared import proto
 
 logger = logging.getLogger(__name__)
 
@@ -20,13 +23,37 @@ def get_channel(host, port, enable_tracing=False):
     return channel
 
 
-def validate(condition, error_message:str = "", error_code:StatusCode = StatusCode.INVALID_ARGUMENT):
+def validate(condition, error_message:str = "", error_code:StatusCode = StatusCode.INVALID_ARGUMENT, field_name = None):
     '''validate or return error message'''
 
     def _validate(context: grpc.ServicerContext):
         if not condition:
-            logger.warn(f"validation failed, {error_message}")
-            context.abort(code=error_code, details=error_message)
+
+            if field_name:
+                logger.warn(f"validation failed, field: {field_name}, error: {error_message}")
+
+                detail = error_details_pb2.BadRequest(
+                    field_violations = [
+                        error_details_pb2.BadRequest.FieldViolation(
+                            field = field_name,
+                            description = error_message
+                        )
+                    ]
+                )
+
+                status = status_pb2.Status(
+                    code=error_code.value[0],
+                    message="validation failed",
+                    details=[proto.pack_any(detail)]
+                )
+
+                # abort with this status
+                output_status = rpc_status.to_status(status)
+                context.abort_with_status(output_status)
+
+            else:
+                logger.warn(f"validation failed, {error_message}")
+                context.abort(code=error_code, details=error_message)
 
     return _validate
 
