@@ -4,6 +4,7 @@ import os
 from grpc import StatusCode, ServicerContext
 from google.protobuf.any_pb2 import Any
 from grpc_status import rpc_status
+from google.rpc import status_pb2
 from chief_of_state.v1.service_pb2_grpc import ChiefOfStateServiceStub
 from chief_of_state.v1.service_pb2 import *
 from banking_app.api_pb2_grpc import BankAccountServiceServicer
@@ -40,6 +41,7 @@ class BankingServiceImpl(BankAccountServiceServicer):
         if not account_id:
             account_id = str(uuid4())
 
+        logger.info(f"opening account {account_id}")
         result = self._cos_process_command(id=account_id, command=request, context=context)
         validate(result is not None, "state was none", StatusCode.INTERNAL)(context)
 
@@ -108,6 +110,10 @@ class BankingServiceImpl(BankAccountServiceServicer):
             return cls._cos_unpack_state(response.state)
         except grpc.RpcError as e:
             output_status = rpc_status.from_call(e)
+
+            if not output_status:
+                context.abort(code=e.code(), details=e.details())
+
             context.abort_with_status(rpc_status.to_status(output_status))
         except Exception as e:
             context.abort(code=StatusCode.INTERNAL, details=str(e))
