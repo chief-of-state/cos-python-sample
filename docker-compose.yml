@@ -62,7 +62,8 @@ services:
 
   chiefofstate:
     image: namely/chief-of-state:0.8-beta.2
-    hostname: chiefofstate
+    deploy:
+      replicas: 2
     ports:
       - 9000
       - 9102
@@ -72,7 +73,8 @@ services:
     environment:
       LOG_LEVEL: "INFO"
       LOG_STYLE: "SIMPLE"
-      COS_REPLICA_COUNT: 1
+      COS_DEPLOYMENT_MODE: docker
+      COS_REPLICA_COUNT: 2
       COS_SERVICE_NAME: "chiefofstate"
       COS_ADDRESS: "0.0.0.0"
       COS_PORT: 9000
