@@ -61,7 +61,7 @@ services:
         - ./code/test_client:/app/test_client:delegated
 
   chiefofstate:
-    image: namely/chief-of-state:0.8-beta.2
+    image: namely/chief-of-state:0.8-beta.4
     deploy:
       replicas: 2
     ports:
