@@ -61,7 +61,7 @@ services:
         - ./code/test_client:/app/test_client:delegated
 
   chiefofstate:
-    image: namely/chief-of-state:0.8-beta.4
+    image: namely/chief-of-state:0.8-rc.1
     deploy:
       replicas: 2
     ports:
@@ -78,6 +78,7 @@ services:
       COS_SERVICE_NAME: "chiefofstate"
       COS_ADDRESS: "0.0.0.0"
       COS_PORT: 9000
+      COS_SNAPSHOT_FREQUENCY: 1
       COS_WRITE_SIDE_HOST: write-handler
       COS_WRITE_SIDE_PORT: 50052
       COS_DB_CREATE_TABLES: "true"
