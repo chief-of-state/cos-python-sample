@@ -94,6 +94,14 @@ services:
       COS_READ_SIDE_ENABLED: "true"
       COS_READ_SIDE_CONFIG__HOST__READSIDE_1: read-handler
       COS_READ_SIDE_CONFIG__PORT__READSIDE_1: 50053
+      COS_TRACE_PROPAGATOR: b3multi,ottracer
+      COS_OTLP_COLLECTOR_ENDPOINT: http://otlp:4317
+
+  otlp:
+    image: otel/opentelemetry-collector
+    volumes:
+      - ./configs/otel-config.yaml:/etc/otel/config.yaml
+
 
   postgres:
     image: postgres:9.6
