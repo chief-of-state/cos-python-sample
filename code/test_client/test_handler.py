@@ -3,6 +3,9 @@ import logging
 from uuid import uuid4
 from google.protobuf.any_pb2 import Any
 from google.protobuf.empty_pb2 import Empty
+from grpc import StatusCode, RpcError
+from grpc_status import rpc_status
+from google.rpc import code_pb2, status_pb2, error_details_pb2
 
 from banking_app.api_pb2 import *
 from banking_app.events_pb2 import *
@@ -29,6 +32,7 @@ class TestHandler():
         Commands._debit(stub)
         Commands._credit(stub)
         Commands._bad_request(stub)
+        Commands._missing_owner_rich_error(stub)
 
 class Commands():
     @staticmethod
@@ -133,6 +137,35 @@ class Commands():
             assert e.details() == "account not found", e.details()
 
         assert did_fail, "supposed to fail!"
+
+    @staticmethod
+    def _missing_owner_rich_error(stub):
+        logger.info("missing account owner, rich error")
+
+        # open account request missing the owner
+        cmd = OpenAccountRequest(balance=200)
+
+        request = HandleCommandRequest(
+            command=pack_any(cmd),
+            prior_state=pack_any(Empty()),
+            prior_event_meta=MetaData(),
+        )
+
+        did_fail = False
+
+        try:
+            stub.HandleCommand(request)
+        except RpcError as e:
+            error_status = rpc_status.from_call(e)
+            assert error_status.details, 'missing details'
+            bad_request = unpack_any(error_status.details[0], error_details_pb2.BadRequest)
+            assert bad_request.field_violations, 'missing violations'
+            violation = bad_request.field_violations[0]
+            assert violation.field == "account_owner"
+            assert violation.description == "missing account owner"
+            did_fail = True
+
+        assert did_fail, "did not fail"
 
 if __name__ == '__main__':
     TestApi.run()

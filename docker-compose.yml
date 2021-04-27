@@ -61,9 +61,9 @@ services:
         - ./code/test_client:/app/test_client:delegated
 
   chiefofstate:
-    image: namely/chief-of-state:dev
-    container_name: chiefofstate
-    hostname: chiefofstate
+    image: namely/chief-of-state:0.8.0
+    deploy:
+      replicas: 1
     ports:
       - 9000
       - 9102
@@ -72,10 +72,13 @@ services:
       - 8888
     environment:
       LOG_LEVEL: "INFO"
-      LOG_STYLE: "JSON"
+      LOG_STYLE: "SIMPLE"
+      COS_DEPLOYMENT_MODE: docker
+      COS_REPLICA_COUNT: 1
       COS_SERVICE_NAME: "chiefofstate"
       COS_ADDRESS: "0.0.0.0"
       COS_PORT: 9000
+      COS_SNAPSHOT_FREQUENCY: 1
       COS_WRITE_SIDE_HOST: write-handler
       COS_WRITE_SIDE_PORT: 50052
       COS_DB_CREATE_TABLES: "true"
@@ -87,10 +90,10 @@ services:
       COS_DB_SCHEMA: "public"
       COS_EVENTS_BATCH_THRESHOLD: 2
       COS_NUM_SNAPSHOTS_TO_RETAIN: 2
-      COS_READ_SIDE_ENABLED: "true"
-      COS_READ_SIDE_CONFIG__HOST__LOGGER_READSIDE: read-handler
-      COS_READ_SIDE_CONFIG__PORT__LOGGER_READSIDE: 50053
       COS_WRITE_PERSISTED_HEADERS: "x-custom-request-uuid"
+      COS_READ_SIDE_ENABLED: "true"
+      COS_READ_SIDE_CONFIG__HOST__READSIDE_1: read-handler
+      COS_READ_SIDE_CONFIG__PORT__READSIDE_1: 50053
       COS_TRACE_PROPAGATOR: b3multi,ottracer
       COS_OTLP_COLLECTOR_ENDPOINT: http://otlp:4317
 
@@ -98,6 +101,7 @@ services:
     image: otel/opentelemetry-collector
     volumes:
       - ./configs/otel-config.yaml:/etc/otel/config.yaml
+
 
   postgres:
     image: postgres:9.6
