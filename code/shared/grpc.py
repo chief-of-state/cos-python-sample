@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 def get_channel(host, port, enable_tracing=False):
     channel = grpc.insecure_channel(f'{host}:{port}')
     if enable_tracing:
-        tracer_interceptor = open_tracing_client_interceptor(opentracing.tracer)
+        tracer_interceptor = open_tracing_client_interceptor(opentracing.global_tracer())
         channel = intercept_channel(channel, tracer_interceptor)
     return channel
 
@@ -100,3 +100,7 @@ def intercept_grpc_server(server, tracer):
     tracer_interceptor = open_tracing_server_interceptor(tracer)
     new_server = intercept_server(server, tracer_interceptor)
     return new_server
+
+# activates the provided span on the global tracer
+def active_global_tracer_span(span):
+    opentracing.global_tracer().scope_manager.activate(span, True)

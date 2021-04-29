@@ -12,10 +12,10 @@ build-base:
     RUN pip install -r requirements.txt
     RUN rm -rf requirements.txt
 
-    COPY -dir +protogen/chief_of_state .
-    COPY -dir +protogen/banking_app .
+    COPY --dir +protogen/chief_of_state .
+    COPY --dir +protogen/banking_app .
 
-    COPY -dir code/shared .
+    COPY --dir code/shared .
 
     SAVE IMAGE
 
@@ -26,7 +26,7 @@ build-package:
 
     WORKDIR /app
 
-    COPY -dir \
+    COPY --dir \
         code/read_handler_impl \
         code/write_handler_impl \
         code/banking_app_impl \
@@ -43,8 +43,8 @@ protogen:
 
     WORKDIR /defs
 
-    COPY -dir ./proto/chief-of-state-protos/chief_of_state /defs
-    COPY -dir ./proto/local/banking_app /defs
+    COPY --dir ./proto/chief-of-state-protos/chief_of_state /defs
+    COPY --dir ./proto/local/banking_app /defs
 
     ARG SHARED_ARGS="-m grpc_tools.protoc -I/defs --python_out=/gen --grpc_python_out=/gen"
     RUN python ${SHARED_ARGS} /defs/chief_of_state/v1/*.proto

@@ -6,13 +6,16 @@ from shared.logging import configure_logging
 from shared.grpc import ServerHelper, get_tracer, intercept_grpc_server
 from banking_app_impl.service import BankingServiceImpl
 from banking_app.api_pb2_grpc import add_BankAccountServiceServicer_to_server as register
+import opentracing
 
 def run(port):
     configure_logging()
-    # define grpc server
+    # define tracer
     tracer = get_tracer('api')
+    opentracing.set_global_tracer(tracer)
+    # define grpc server
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    server = intercept_grpc_server(server, tracer)
+    server = intercept_grpc_server(server, opentracing.global_tracer())
     # add grpc implementation to server
     register(BankingServiceImpl(), server)
     # set port

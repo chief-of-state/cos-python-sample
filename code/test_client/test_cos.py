@@ -63,7 +63,7 @@ class TestCos():
         persisted_headers = unpack_any(persisted_headers, Headers)
         header = persisted_headers.headers[0]
         assert header.key == meta_key, f"missing key {meta_key}"
-        assert header.stringValue == meta_value, f"missing key {meta_value}"
+        assert header.string_value == meta_value, f"missing key {meta_value}"
 
 
     @staticmethod

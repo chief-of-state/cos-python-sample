@@ -18,7 +18,7 @@ from banking_app.api_pb2 import (
 )
 
 from shared.proto import unpack_any, pack_any, to_json
-from shared.grpc import validate, get_channel
+from shared.grpc import validate, get_channel, active_global_tracer_span
 from uuid import uuid4
 import grpc
 
@@ -33,6 +33,7 @@ class BankingServiceImpl(BankAccountServiceServicer):
         '''handle requests to open an account'''
 
         logger.info("opening account")
+        active_global_tracer_span(context.get_active_span())
 
         validate(request.balance >= 200, "minimum balance of 200 required")(context)
 
@@ -52,6 +53,7 @@ class BankingServiceImpl(BankAccountServiceServicer):
         '''handle debit account'''
 
         logger.info("debiting account")
+        active_global_tracer_span(context.get_active_span())
 
         validate(request.amount > 0, "amount must be greater than 0")(context)
 
@@ -64,6 +66,7 @@ class BankingServiceImpl(BankAccountServiceServicer):
     def CreditAccount(self, request: CreditAccountRequest, context) -> ApiResponse:
         '''handle credit account'''
         logger.info("crediting account")
+        active_global_tracer_span(context.get_active_span())
 
         validate(request.amount >= 0, "credits must be positive")(context)
 
@@ -76,6 +79,7 @@ class BankingServiceImpl(BankAccountServiceServicer):
     def Get(self, request: GetAccountRequest, context: grpc.ServicerContext) -> ApiResponse:
         '''handle get request'''
         logger.info("getting account")
+        active_global_tracer_span(context.get_active_span())
         client = self._get_cos_client()
         command = GetStateRequest()
         command.entity_id=request.account_id

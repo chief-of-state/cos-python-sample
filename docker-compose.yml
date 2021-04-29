@@ -61,7 +61,7 @@ services:
         - ./code/test_client:/app/test_client:delegated
 
   chiefofstate:
-    image: namely/chief-of-state:0.8.0
+    image: namely/chief-of-state:0.8.1-rc.1
     deploy:
       replicas: 1
     ports:
@@ -95,10 +95,10 @@ services:
       COS_READ_SIDE_CONFIG__HOST__READSIDE_1: read-handler
       COS_READ_SIDE_CONFIG__PORT__READSIDE_1: 50053
       COS_TRACE_PROPAGATOR: b3multi,ottracer
-      COS_OTLP_COLLECTOR_ENDPOINT: http://otlp:4317
+      COS_TELEMETRY_COLLECTOR_ENDPOINT: http://otlp:4317
 
   otlp:
-    image: otel/opentelemetry-collector
+    image: otel/opentelemetry-collector-contrib:0.21.0
     volumes:
       - ./configs/otel-config.yaml:/etc/otel/config.yaml
 
