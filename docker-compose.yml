@@ -61,7 +61,7 @@ services:
         - ./code/test_client:/app/test_client:delegated
 
   chiefofstate:
-    image: namely/chief-of-state:0.8.1-rc.2
+    image: namely/chief-of-state:0.8.1
     deploy:
       replicas: 1
     ports:
@@ -104,7 +104,7 @@ services:
 
 
   postgres:
-    image: postgres:9.6
+    image: postgres:11
     container_name: postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
