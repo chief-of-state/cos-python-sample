@@ -15,5 +15,5 @@ class ReadSideHandlerImpl(ReadSideHandlerServiceServicer):
 
     def HandleReadSide(self, request, context):
         state = unpack_any(request.state, BankAccount)
-        logger.info(f"entity={request.meta.entity_id}, revision={request.meta.revision_number}, balance={state.account_balance}, eventType={request.event.type_url}")
+        logger.info(f"readSideId={request.read_side_id}, entity={request.meta.entity_id}, revision={request.meta.revision_number}, balance={state.account_balance}, eventType={request.event.type_url}")
         return HandleReadSideResponse(successful=True)

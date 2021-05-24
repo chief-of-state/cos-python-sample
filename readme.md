@@ -27,7 +27,7 @@ git submodule update --init
 brew install earthly
 
 # updates submodules, generates protobufs
-earth +all
+earthly +all
 
 # starts all containers
 docker-compose up -d
@@ -38,7 +38,7 @@ docker-compose exec test-client python -m test_client
 # OTHER HELPFUL COMMANDS
 
 # only generate protobufs locally
-earth +protogen
+earthly +protogen
 
 # supervise app logs
 docker-compose logs -f --tail="all" api write-handler read-handler
