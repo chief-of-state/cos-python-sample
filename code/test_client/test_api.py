@@ -21,20 +21,21 @@ class TestApi():
         channel = get_channel(host, port, True)
         stub = BankAccountServiceStub(channel)
 
-        TestApi._consistent_account(stub)
+        # TestApi._consistent_account(stub)
 
-        TestApi._missing_account(stub)
-        TestApi._missing_owner_rich_error(stub)
+        # TestApi._missing_account(stub)
+        # TestApi._missing_owner_rich_error(stub)
 
-        TestApi._validation_fail(stub)
-        TestApi._not_found(stub)
-        TestApi._rpc_fail(stub)
-        TestApi._no_op(stub)
+        # TestApi._validation_fail(stub)
+        # TestApi._not_found(stub)
+        # TestApi._rpc_fail(stub)
+        # TestApi._no_op(stub)
 
         # create and do transactions against many accounts
         balances = {}
+        num_accounts = 10
 
-        for _ in range(10):
+        for _ in range(num_accounts):
             id = TestApi._open(stub)
             balances[id] = 200
 
@@ -107,7 +108,6 @@ class TestApi():
         request = DebitAccountRequest(account_id=id, amount=1)
         response = stub.DebitAccount(request)
         assert isinstance(response, ApiResponse)
-        logger.info(response)
         assert response.account.account_id==id, f"wrong ID '{response.account.account_id}'"
         logger.info(f"debitted consistent account {id}, balance {response.account.account_balance}")
 
@@ -197,6 +197,7 @@ class TestApi():
         response = stub.OpenAccount(cmd)
         assert isinstance(response, ApiResponse)
         account_id = response.account.account_id
+        logger.info(f"hit {response.account.account_id}")
         balance = response.account.account_balance
 
         # apply $0 credit, which internally is a no-op command

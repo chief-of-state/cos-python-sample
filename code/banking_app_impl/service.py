@@ -37,10 +37,10 @@ class BankingServiceImpl(BankAccountServiceServicer):
 
         validate(request.balance >= 200, "minimum balance of 200 required")(context)
 
-        account_id = request.account_id
+        if not request.account_id:
+            request.account_id = str(uuid4())
 
-        if not account_id:
-            account_id = str(uuid4())
+        account_id = request.account_id
 
         logger.info(f"opening account {account_id}")
         result = self._cos_process_command(id=account_id, command=request, context=context)

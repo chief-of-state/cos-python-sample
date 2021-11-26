@@ -64,7 +64,7 @@ class CommandHandler():
         validate(command.account_owner, "missing account owner", field_name="account_owner")(self.context)
 
         event = AccountOpened(
-            account_id=prior_event_meta.entity_id,
+            account_id=command.account_id,
             balance=command.balance,
             account_owner=command.account_owner
         )
@@ -73,11 +73,9 @@ class CommandHandler():
 
     def _debit_account(self, request: HandleCommandRequest, prior_state: BankAccount, prior_event_meta: MetaData):
         '''handle debit'''
-        validate(prior_event_meta.revision_number > 0, "account not found", StatusCode.NOT_FOUND)(self.context)
-
         command: DebitAccountRequest = unpack_any(request.command, DebitAccountRequest)
+        validate(prior_event_meta.revision_number > 0, "account not found", StatusCode.NOT_FOUND)(self.context)
         validate(prior_state.account_balance - command.amount >= 0, "insufficient funds")(self.context)
-
         event = AccountDebited(
             account_id=prior_state.account_id,
             amount=command.amount

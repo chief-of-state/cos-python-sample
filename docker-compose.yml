@@ -74,20 +74,20 @@ services:
       - 8888
     environment:
       LOG_LEVEL: "DEBUG"
-      SERVICE_NAME: "chiefofstate"
-      GRPC_PORT: 9000
-      TRACE_ENABLED: "true"
-      TRACE_URL: "otlp:4317"
-      METRICS_ENABLED: "true"
-      METRICS_PORT: 9092
-      DB_USER: "postgres"
-      DB_PASSWORD: "changeme"
-      DB_HOST: "postgres"
-      DB_PORT: 5432
-      DB_NAME: "postgres"
-      DB_SCHEMA: "public"
-      WRITE_SIDE_HOST: write-handler
-      WRITE_SIDE_PORT: 50052
+      COS_SERVICE_NAME: "chiefofstate"
+      COS_PORT: 9000
+      COS_TRACE_ENABLED: "true"
+      COS_METRICS_ENABLED: "true"
+      COS_METRICS_PORT: 9092
+      COS_DB_USER: "postgres"
+      COS_DB_PASSWORD: "changeme"
+      COS_DB_HOST: "postgres"
+      COS_DB_PORT: 5432
+      COS_DB_DB: "postgres"
+      COS_DB_SCHEMA: "public"
+      COS_WRITE_SIDE_HOST: write-handler
+      COS_WRITE_SIDE_PORT: 50052
+      COS_TELEMETRY_COLLECTOR_ENDPOINT: "otlp:4317"
 
   otlp:
     image: otel/opentelemetry-collector-contrib:0.21.0
