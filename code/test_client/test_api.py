@@ -107,7 +107,8 @@ class TestApi():
         request = DebitAccountRequest(account_id=id, amount=1)
         response = stub.DebitAccount(request)
         assert isinstance(response, ApiResponse)
-        assert response.account.account_id==id
+        logger.info(response)
+        assert response.account.account_id==id, f"wrong ID '{response.account.account_id}'"
         logger.info(f"debitted consistent account {id}, balance {response.account.account_balance}")
 
     @staticmethod
