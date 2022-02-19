@@ -1,6 +1,6 @@
 # COS Python Sample App
 
-Sample gRPC python application using [Chief of State](https://github.com/namely/chief-of-state).
+Sample gRPC python application using [Chief of State](https://github.com/chief-of-state/chief-of-state).
 
 ### Overview
 
@@ -48,6 +48,7 @@ docker-compose logs -f chiefofstate
 ```
 
 ### installing dependencies for local dev in an IDE
+
 ```bash
 # configure virtual env
 python -m venv .venv
