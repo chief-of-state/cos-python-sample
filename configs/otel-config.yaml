@@ -1,31 +1,31 @@
-extensions:
-  health_check:
-
 receivers:
+  # Make sure to add the otlp receiver.
+  # This will open up the receiver on port 4317
   otlp:
     protocols:
       grpc:
+        endpoint: "0.0.0.0:4317"
 
 processors:
-  batch:
-
+extensions:
+  health_check: { }
 exporters:
-  jaeger_thrift:
-    url: "http://tracer:14268/api/traces"
+  jaeger:
+    endpoint: "tracer:14250"
+    insecure: true
 
   prometheus:
     endpoint: "0.0.0.0:9102"
 
+  logging:
 service:
+  extensions: [ health_check ]
   pipelines:
     traces:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [jaeger_thrift]
-
+      receivers: [ otlp ]
+      processors: [ ]
+      exporters: [ jaeger ]
     metrics:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [prometheus]
-
-  extensions: [health_check]
+      receivers: [ otlp ]
+      processors: [ ]
+      exporters: [ logging, prometheus ]

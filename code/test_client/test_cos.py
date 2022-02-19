@@ -1,19 +1,17 @@
-from uuid import uuid4
-from grpc import StatusCode
-from google.protobuf.empty_pb2 import Empty
 import logging
+from uuid import uuid4
 
-from banking_app.api_pb2_grpc import BankAccountServiceStub
 from banking_app.api_pb2 import *
+from banking_app.api_pb2_grpc import BankAccountServiceStub
 from banking_app.events_pb2 import *
 from banking_app.state_pb2 import *
-
+from chief_of_state.v1.service_pb2 import (GetStateRequest,
+                                           ProcessCommandRequest)
 from chief_of_state.v1.service_pb2_grpc import ChiefOfStateServiceStub
-from chief_of_state.v1.service_pb2 import ProcessCommandRequest, GetStateRequest
-from chief_of_state.plugins.persisted_headers.v1.headers_pb2 import Headers, Header
-
-from shared.proto import *
+from google.protobuf.empty_pb2 import Empty
+from grpc import StatusCode
 from shared.grpc import *
+from shared.proto import *
 
 logger = logging.getLogger("chief-of-state")
 
@@ -35,35 +33,35 @@ class TestCos():
 
         channel.close()
 
-    @staticmethod
-    def _persist_header(stub):
-        # persisted header is returned in the meta
-        logger.info("persist header")
-        id = str(uuid4())
-        # create a command
-        command = OpenAccountRequest(account_owner="some owner", balance=200)
-        # wrap in COS request
-        cos_request = ProcessCommandRequest(
-            entity_id = id,
-            command = pack_any(command)
-        )
-        # send to COS
-        meta_key = "x-custom-request-uuid"
-        meta_value = str(uuid4)
-        metadata = [(meta_key, meta_value)]
-        # response = stub.ProcessCommand(request=cos_request, metadata=metadata)
+    # @staticmethod
+    # def _persist_header(stub):
+    #     # persisted header is returned in the meta
+    #     logger.info("persist header")
+    #     id = str(uuid4())
+    #     # create a command
+    #     command = OpenAccountRequest(account_owner="some owner", balance=200)
+    #     # wrap in COS request
+    #     cos_request = ProcessCommandRequest(
+    #         entity_id = id,
+    #         command = pack_any(command)
+    #     )
+    #     # send to COS
+    #     meta_key = "x-custom-request-uuid"
+    #     meta_value = str(uuid4)
+    #     metadata = [(meta_key, meta_value)]
+    #     # response = stub.ProcessCommand(request=cos_request, metadata=metadata)
 
-        response, call = stub.ProcessCommand.with_call(request=cos_request, metadata=metadata)
+    #     response, call = stub.ProcessCommand.with_call(request=cos_request, metadata=metadata)
 
-        output_state = unpack_any(response.state, BankAccount)
+    #     output_state = unpack_any(response.state, BankAccount)
 
-        persisted_headers = response.meta.data.get("persisted_headers.v1")
+    #     persisted_headers = response.meta.data.get("persisted_headers.v1")
 
-        assert persisted_headers is not None, "missing persisted_headers.v1"
-        persisted_headers = unpack_any(persisted_headers, Headers)
-        header = persisted_headers.headers[0]
-        assert header.key == meta_key, f"missing key {meta_key}"
-        assert header.string_value == meta_value, f"missing key {meta_value}"
+    #     assert persisted_headers is not None, "missing persisted_headers.v1"
+    #     persisted_headers = unpack_any(persisted_headers, Headers)
+    #     header = persisted_headers.headers[0]
+    #     assert header.key == meta_key, f"missing key {meta_key}"
+    #     assert header.string_value == meta_value, f"missing key {meta_value}"
 
 
     @staticmethod

@@ -48,7 +48,6 @@ protogen:
 
     ARG SHARED_ARGS="-m grpc_tools.protoc -I/defs --python_out=/gen --grpc_python_out=/gen"
     RUN python ${SHARED_ARGS} /defs/chief_of_state/v1/*.proto
-    RUN python ${SHARED_ARGS} /defs/chief_of_state/plugins/persisted_headers/v1/*.proto
     RUN python ${SHARED_ARGS} /defs/banking_app/*.proto
 
     SAVE ARTIFACT /gen/chief_of_state AS LOCAL code/chief_of_state

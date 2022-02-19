@@ -2,7 +2,6 @@ import logging
 from chief_of_state.v1.readside_pb2_grpc import ReadSideHandlerServiceServicer
 from chief_of_state.v1.readside_pb2 import HandleReadSideRequest, HandleReadSideResponse
 from chief_of_state.v1.common_pb2 import MetaData
-from chief_of_state.plugins.persisted_headers.v1.headers_pb2 import Headers, Header
 from shared.proto import to_json, unpack_any
 from banking_app.events_pb2 import *
 from banking_app.state_pb2 import *
