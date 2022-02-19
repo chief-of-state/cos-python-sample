@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   api:
-    image: namely/cos-python-sample:dev
+    image: cos-python-sample:dev
     container_name: api
     entrypoint:
       - python
@@ -17,7 +17,7 @@ services:
       TRACE_PORT: 5775
 
   write-handler:
-    image: namely/cos-python-sample:dev
+    image: cos-python-sample:dev
     container_name: write-handler
     entrypoint:
       - python
@@ -31,7 +31,7 @@ services:
       TRACE_PORT: 5775
 
   read-handler:
-    image: namely/cos-python-sample:dev
+    image: cos-python-sample:dev
     container_name: read-handler
     entrypoint:
       - python
@@ -45,7 +45,7 @@ services:
       TRACE_PORT: 5775
 
   test-client:
-    image: namely/cos-python-sample:dev
+    image: cos-python-sample:dev
     container_name: test-client
     entrypoint:
       - sleep
