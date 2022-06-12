@@ -12,7 +12,8 @@ extensions:
 exporters:
   jaeger:
     endpoint: "tracer:14250"
-    insecure: true
+    tls:
+      insecure: true
 
   prometheus:
     endpoint: "0.0.0.0:9102"

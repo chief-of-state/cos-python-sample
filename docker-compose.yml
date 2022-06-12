@@ -61,7 +61,7 @@ services:
         - ./code/test_client:/app/test_client:delegated
 
   chiefofstate:
-    image: ghcr.io/chief-of-state/chief-of-state:1.0.0-beta.1
+    image: ghcr.io/chief-of-state/chief-of-state:1.0.0
     command:
       - 'run'
     deploy:
@@ -130,7 +130,8 @@ services:
       - "9090:9090"
 
   otlp:
-    image: otel/opentelemetry-collector
+    image: otel/opentelemetry-collector-contrib:0.52.0
+    command: ["--config=/etc/otel/config.yaml", ""]
     ports:
       - "4317:4317" # OTLP gRPC receiver
       - "13133:13133" # health_check extension
