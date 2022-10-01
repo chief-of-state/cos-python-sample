@@ -1,0 +1,5 @@
+readSideId: read-side-1
+host: read-handler
+port: 50053
+useTls: false
+autoStart: true
