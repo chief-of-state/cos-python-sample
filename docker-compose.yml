@@ -61,9 +61,9 @@ services:
         - ./code/test_client:/app/test_client:delegated
 
   chiefofstate:
-    image: ghcr.io/chief-of-state/chief-of-state:dev
+    image: ghcr.io/chief-of-state/chief-of-state:2.2.0
     volumes:
-      - ./configs/readsides.yml:/etc/readsides.yml
+      - ./configs/readsides:/readsides
     command:
       - 'run'
     deploy:
@@ -96,10 +96,15 @@ services:
       COS_NUM_SNAPSHOTS_TO_RETAIN: 2
       COS_WRITE_PERSISTED_HEADERS: "x-custom-request-uuid"
       COS_READ_SIDE_ENABLED: "true"
-      COS_READ_SIDE_CONFIG: /etc/readsides.yml
+      # comment this line to use the env vars
+      COS_READ_SIDE_CONFIG: /readsides
+      # uncomment these lines to use the env vars
+      # COS_READ_SIDE_CONFIG__HOST__READSIDE_1: read-handler
+      # COS_READ_SIDE_CONFIG__PORT__READSIDE_1: 50053          
       OTEL_JAVAAGENT_ENABLED: "true"
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otlp:4317
       OTEL_SERVICE_NAME: cospython
+      OTEL_PROPAGATORS: "b3"
 
   postgres:
     image: postgres:11
