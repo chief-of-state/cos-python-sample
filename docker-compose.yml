@@ -107,7 +107,7 @@ services:
       OTEL_PROPAGATORS: "b3"
 
   postgres:
-    image: postgres:11
+    image: postgres:15
     container_name: postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
