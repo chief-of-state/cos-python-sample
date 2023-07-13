@@ -3,3 +3,5 @@ host: read-handler
 port: 50053
 useTls: false
 autoStart: true
+enabled: true
+failurePolicy: SKIP

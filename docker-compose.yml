@@ -61,21 +61,25 @@ services:
         - ./code/test_client:/app/test_client:delegated
 
   chiefofstate:
-    image: ghcr.io/chief-of-state/chief-of-state:2.2.0
+    image: ghcr.io/chief-of-state/chief-of-state:2.4.0
     volumes:
       - ./configs/readsides:/readsides
     command:
       - 'run'
     deploy:
       replicas: 1
+      # resources:
+      #   limits:
+      #     cpus: 0
+      #     memory: 
     ports:
-      - 9000:9000
+      - 9200:9000
       - 9102
       - 9095
       - 5266
       - 8888
     environment:
-      LOG_LEVEL: "INFO"
+      LOG_LEVEL: info
       LOG_STYLE: "SIMPLE"
       COS_DEPLOYMENT_MODE: docker
       COS_REPLICA_COUNT: 1
@@ -96,11 +100,11 @@ services:
       COS_NUM_SNAPSHOTS_TO_RETAIN: 2
       COS_WRITE_PERSISTED_HEADERS: "x-custom-request-uuid"
       COS_READ_SIDE_ENABLED: "true"
-      # comment this line to use the env vars
       COS_READ_SIDE_CONFIG: /readsides
-      # uncomment these lines to use the env vars
-      # COS_READ_SIDE_CONFIG__HOST__READSIDE_1: read-handler
-      # COS_READ_SIDE_CONFIG__PORT__READSIDE_1: 50053          
+      COS_READ_SIDE_CONFIG__HOST__READSIDE_1: read-handler
+      COS_READ_SIDE_CONFIG__PORT__READSIDE_1: 50053          
+      COS_READ_SIDE_CONFIG__ENABLED__READSIDE_1: true
+      COS_READ_SIDE_CONFIG__FAILURE_POLICY__READSIDE_1: REPLAY_SKIP
       OTEL_JAVAAGENT_ENABLED: "true"
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otlp:4317
       OTEL_SERVICE_NAME: cospython
