@@ -61,7 +61,7 @@ services:
         - ./code/test_client:/app/test_client:delegated
 
   chiefofstate:
-    image: ghcr.io/chief-of-state/chief-of-state:2.4.0
+    image: ghcr.io/chief-of-state/chief-of-state:2.4.12
     volumes:
       - ./configs/readsides:/readsides
     command:
