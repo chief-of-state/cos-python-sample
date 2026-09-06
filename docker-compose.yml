@@ -132,7 +132,7 @@ services:
       - "5775"
 
   prometheus:
-    image: prom/prometheus:v2.54.1
+    image: prom/prometheus:v3.14.0
     volumes:
       - ./configs/prometheus.yml:/etc/prometheus/prometheus.yml
     command:
